@@ -1,0 +1,30 @@
+[*]
+[*] GTKWave Analyzer v3.3.89 (w)1999-2018 BSI
+[*] Fri Dec 20 23:00:12 2019
+[*]
+[dumpfile] "/Users/me/src/elec/nmigen/out.vcd"
+[dumpfile_mtime] "Fri Dec 20 22:59:53 2019"
+[dumpfile_size] 417130
+[savefile] "/Users/me/src/elec/nmigen/out.gtkw"
+[timestart] 0
+[size] 1440 855
+[pos] -1 -1
+*-26.278996 88300000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.mixer.
+[sst_width] 231
+[signals_width] 327
+[sst_expanded] 1
+[sst_vpaned_height] 256
+@28
+top.mixer.clk
+@10022
+top.mixer.sample_out[10:0]
+@20000
+-
+-
+-
+@28
+top.mixer.mix_fsm_state
+[pattern_trace] 1
+[pattern_trace] 0

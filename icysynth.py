@@ -8,19 +8,17 @@ from nmigen.back.pysim import *
 from nmigen.hdl.rec import *
 
 from pll import *
+from uart import *
 
 # --------------------------------------------------------------------------------------------------
 # Constants
 # --------------------------------------------------------------------------------------------------
 
-CLK_RATE      = 16000000
-KHZ           = 1000
-MHZ           = 1000 * KHZ
-SAMPLE_RATE   = 16000
-SAMPLE_CYCS   = CLK_RATE // SAMPLE_RATE
-SAMPLE_PERIOD = 1 / SAMPLE_CYCS
-CLK_PERIOD    = 1 / CLK_RATE
 NUM_CHANNELS  = 8
+CLK_RATE      = 16777216
+SAMPLE_RATE   = 16384
+SAMPLE_CYCS   = CLK_RATE // SAMPLE_RATE
+CLK_PERIOD    = 1 / CLK_RATE
 
 # --------------------------------------------------------------------------------------------------
 # Sample RAM
@@ -429,7 +427,7 @@ class IcySynth(Elaboratable):
 		m = Module()
 
 		if platform:
-			pll = PLL(platform.default_clk_frequency / 1_000_000, 16)
+			pll = PLL(platform.default_clk_frequency / 1_000_000, CLK_RATE / 1_000_000)
 			# overrides the default 'sync' domain
 			m.domains += pll.domain
 			m.submodules.pll = pll

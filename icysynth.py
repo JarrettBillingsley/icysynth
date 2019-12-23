@@ -249,6 +249,86 @@ class WaveChannel(Elaboratable):
 		return m
 
 # --------------------------------------------------------------------------------------------------
+# Noise Channel
+# --------------------------------------------------------------------------------------------------
+
+class NoiseState(Record):
+	def __init__(self, name=None):
+		super().__init__([
+			('period', 16),
+			('vol',    4),
+		], name=name)
+
+class NoiseEnable(Record):
+	def __init__(self):
+		super().__init__([
+			('period', 1),
+			('vol',    1),
+		])
+
+class NoiseChannel(Elaboratable):
+	def __init__(self):
+		# -------------------------------------
+		# Inputs
+
+		self.inputs      = NoiseState()
+		self.we          = NoiseEnable()
+		self.commit      = Signal()
+
+		# TODO: BZZ mode
+
+		# -------------------------------------
+		# Outputs
+
+		self.sound_out = Signal(8)
+
+	def elaborate(self, platform: Platform) -> Module:
+		m = Module()
+
+		# -------------------------------------
+		# Internal State
+
+		shadow  = NoiseState(name='shadow')
+		state   = NoiseState(name='real')
+		lfsr    = Signal(15)
+		counter = Signal(16)
+
+		lfsr.reset = 1
+
+		# if platform:
+		state.period.reset = 50
+		state.vol.reset    = 0xF
+
+		# -------------------------------------
+		# Combinational Logic
+
+		m.d.comb += self.sound_out.eq(Mux(lfsr[0], Repl(state.vol, 2), 0))
+
+		# -------------------------------------
+		# Sequential Logic
+
+		# Processing
+		with m.If(counter == 0):
+			m.d.sync += [
+				counter.eq(state.period),
+				lfsr.eq(Cat(lfsr[1:15], lfsr[0] ^ lfsr[1])),
+			]
+		with m.Else():
+			m.d.sync += counter.eq(counter - 1)
+
+		# Writing to shadow state
+		with m.If(self.we.period):
+			m.d.sync += shadow.period.eq(self.inputs.period)
+		with m.If(self.we.vol):
+			m.d.sync += shadow.vol.eq(self.inputs.vol)
+
+		# Committing shadow state to real state
+		with m.If(self.commit):
+			m.d.sync += state.eq(shadow)
+
+		return m
+
+# --------------------------------------------------------------------------------------------------
 # Mixer
 # --------------------------------------------------------------------------------------------------
 
@@ -288,7 +368,7 @@ class Mixer(Elaboratable):
 		# -------------------------------------
 		# Outputs
 
-		self.sample_out  = Signal(range(self.acc_range))
+		self.mixer_out  = Signal(range(self.acc_range))
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
@@ -297,10 +377,9 @@ class Mixer(Elaboratable):
 		# Submodules
 
 		sample_ram = SampleRam()
-		channels   = Array([WaveChannel(i) for i in range(self.num_channels)])
-
 		volume_rom = VolumeRom()
-		cycle_counter = Signal(range(self.sample_cycs))
+		channels   = Array([WaveChannel(i) for i in range(self.num_channels)])
+		noise      = NoiseChannel()
 
 		m.submodules.sample_ram = sample_ram
 		m.submodules.volume_rom = volume_rom
@@ -308,16 +387,21 @@ class Mixer(Elaboratable):
 		for (i, c) in enumerate(channels):
 			m.submodules[f'ch_{i}'] = c
 
+		m.submodules.noise = noise
+
 		# -------------------------------------
 		# Internal state
 
 		shadow = MixerState(self.num_channels, name='shadow')
 		state  = MixerState(self.num_channels, name='real')
-
-
-		acc    = Signal(range(self.acc_range))
 		shadow.mix_shift.reset = 3
 		state.mix_shift.reset = 3
+
+		acc           = Signal(range(self.acc_range))
+		cycle_counter = Signal(range(self.sample_cycs))
+
+		if platform:
+			state.chan_enable.reset = 0xFF
 
 		# -------------------------------------
 		# Combinational Logic
@@ -331,9 +415,9 @@ class Mixer(Elaboratable):
 			with m.If(self.chan_select == i):
 				m.d.comb += channels[i].we.eq(self.chan_we)
 
+		sample_out = Signal(range(self.acc_range))
 
-		if platform:
-			state.chan_enable.reset = 0xFF
+		m.d.comb += self.mixer_out.eq((sample_out + noise.sound_out) >> state.mix_shift)
 
 		# -------------------------------------
 		# Sequential Logic
@@ -360,7 +444,7 @@ class Mixer(Elaboratable):
 					m.d.comb += channels[i].enabled.eq(state.chan_enable[i])
 
 				m.d.sync += [
-					self.sample_out.eq(acc >> state.mix_shift),
+					sample_out.eq(acc),
 					acc.eq(0),
 				]
 
@@ -437,7 +521,7 @@ class IcySynth(Elaboratable):
 		m.submodules.pwm = self.pwm
 
 		m.d.comb += [
-			self.pwm.i.eq(self.mixer.sample_out[:8]),
+			self.pwm.i.eq(self.mixer.mixer_out[:8]),
 			self.sound_out.eq(self.pwm.o),
 		]
 

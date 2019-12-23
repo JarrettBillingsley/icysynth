@@ -6,3 +6,5 @@
 Cause [doing it on an ATTiny85][tinysynth] wasn't enough.
 
 It's the same synth, reimplemented in [nMigen][nmigen], and developed on an iCEStick FPGA. Whee!
+
+Really I just did it to learn nMigen and how to do FPGA stuff.

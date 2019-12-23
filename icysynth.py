@@ -7,14 +7,16 @@ from nmigen.back import verilog
 from nmigen.back.pysim import *
 from nmigen.hdl.rec import *
 
+from pll import *
+
 # --------------------------------------------------------------------------------------------------
 # Constants
 # --------------------------------------------------------------------------------------------------
 
-CLK_RATE      = 12000000
+CLK_RATE      = 16000000
 KHZ           = 1000
 MHZ           = 1000 * KHZ
-SAMPLE_RATE   = 46875
+SAMPLE_RATE   = 16000
 SAMPLE_CYCS   = CLK_RATE // SAMPLE_RATE
 SAMPLE_PERIOD = 1 / SAMPLE_CYCS
 CLK_PERIOD    = 1 / CLK_RATE
@@ -413,6 +415,40 @@ class PWM(Elaboratable):
 		return m
 
 # --------------------------------------------------------------------------------------------------
+# The synth as a single module
+# --------------------------------------------------------------------------------------------------
+
+class IcySynth(Elaboratable):
+	def __init__(self, num_channels: int, sample_cycs: int):
+		self.sound_out = Signal()
+		self.mixer     = Mixer(num_channels, sample_cycs)
+		self.pwm       = PWM()
+		pass
+
+	def elaborate(self, platform: Platform) -> Module:
+		m = Module()
+
+		if platform:
+			pll = PLL(platform.default_clk_frequency / 1_000_000, 16)
+			# overrides the default 'sync' domain
+			m.domains += pll.domain
+			m.submodules.pll = pll
+			m.d.comb += pll.clk_pin.eq(platform.request(platform.default_clk, dir='-'))
+
+		m.submodules.mixer = self.mixer
+		m.submodules.pwm = self.pwm
+
+		m.d.comb += [
+			self.pwm.i.eq(self.mixer.sample_out[:8]),
+			self.sound_out.eq(self.pwm.o),
+		]
+
+		if platform:
+			m.d.comb += platform.request('sound_out').pin.eq(m.submodules.pwm.o)
+
+		return m
+
+# --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
 
@@ -453,14 +489,14 @@ def test_proc(mix):
 	yield from toggle_enable(mix.we.chan_enable)
 	yield from toggle_enable(mix.commit)
 
-SIM_CLOCKS = 3000
+SIM_CLOCKS = 5000
 
-def simulate(dut):
-	sim = Simulator(dut)
+def simulate(top, dut):
+	sim = Simulator(top)
 	sim.add_clock(CLK_PERIOD)
 
 	def fuckyou():
-		yield from test_proc(dut.submodules.mixer)
+		yield from test_proc(dut.mixer)
 	sim.add_sync_process(fuckyou)
 
 	# BUG: nmigen currently ignores the 'traces' param on this function,
@@ -482,18 +518,15 @@ def parse_args():
 	return parser.parse_args()
 
 if __name__ == "__main__":
-	dut = Module()
-	dut.submodules.mixer = Mixer(NUM_CHANNELS, SAMPLE_CYCS)
-	dut.submodules.pwm = PWM()
-
-	dut.d.comb += dut.submodules.pwm.i.eq(dut.submodules.mixer.sample_out[:8])
-
+	top = Module()
+	dut = IcySynth(NUM_CHANNELS, SAMPLE_CYCS)
+	top.submodules.synth = dut
 	args = parse_args()
 
 	if args.action == "simulate":
-		simulate(dut)
+		simulate(top, dut)
 	elif args.action == "generate":
-		v = verilog.convert(dut, name = "top")
+		v = verilog.convert(top, name = "top")
 
 		with open('icysynth.v', 'w') as f:
 			print(v, file=f)
@@ -508,6 +541,6 @@ if __name__ == "__main__":
 			)
 		])
 
-		dut.d.comb += platform.request('sound_out').pin.eq(dut.submodules.pwm.o)
-
-		platform.build(dut, do_program=True)
+		platform.build(top, do_program=True)
+	else:
+		print("wat?")

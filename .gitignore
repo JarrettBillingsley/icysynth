@@ -2,3 +2,5 @@ build/
 __pycache__/
 *.gtkw
 *.vcd
+.DS_STORE
+__MACOSX__

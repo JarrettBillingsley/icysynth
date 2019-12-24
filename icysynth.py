@@ -53,7 +53,7 @@ class IcySynth(Elaboratable):
 			m.submodules.pll = pll
 			m.d.comb += pll.clk_pin.eq(platform.request(platform.default_clk, dir='-'))
 
-			uart_freq = pll.best_fout
+			uart_freq = int(pll.best_fout * 1_000_000)
 
 		m.submodules.mixer = self.mixer
 		m.submodules.pwm   = self.pwm
@@ -115,7 +115,8 @@ def parse_args():
 	return parser.parse_args()
 
 def interactive():
-	connect_over_serial('ftdi://ftdi:2232:14:b/2', baudrate=9600)
+	# TODO: this is not robust at all.
+	connect_over_serial('ftdi://ftdi:2232:14:c/2', baudrate = BAUDRATE)
 
 if __name__ == "__main__":
 	top = Module()

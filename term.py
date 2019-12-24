@@ -30,6 +30,8 @@
 import os
 import sys
 
+from serial.serialutil import SerialException
+
 _INIT = False
 
 # Bits n pieces of code taken from pyterm.py by the Emmanuels Blot/Bouaziz
@@ -46,7 +48,16 @@ def connect_over_serial(url, baudrate):
             (stdin.fileno(), stdout.fileno(), stderr.fileno())]
 
     from pyftdi.serialext import serial_for_url
-    port = serial_for_url(url, baudrate=baudrate)
+
+    try:
+        port = serial_for_url(url, baudrate=baudrate)
+    except SerialException as e:
+        print("Uh-oh:", e)
+        from pyftdi.ftdi import Ftdi
+
+        Ftdi().open_from_url('ftdi:///?')
+        sys.exit(1)
+
 
     print("Connected.")
 

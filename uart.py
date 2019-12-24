@@ -18,7 +18,6 @@ class UART(Elaboratable):
         self.rx_pin = Signal(reset=1)
         self.rx_rdy = Signal()
         self.rx_err = Signal()
-        # self.rx_ovf = Signal()  # XXX not used yet
         self.rx_data = Signal(data_bits)
 
         self.ports = (
@@ -30,7 +29,6 @@ class UART(Elaboratable):
                       self.rx_pin,
                       self.rx_rdy,
                       self.rx_err,
-                      # self.rx_ovf,
                       self.rx_data,
                      )
 
@@ -48,7 +46,6 @@ class UART(Elaboratable):
             rx.rx_pin.eq(self.rx_pin),
             self.rx_rdy.eq(rx.rx_rdy),
             self.rx_err.eq(rx.rx_err),
-            # self.rx_ovf.eq(rx.rx_ovf),
             self.rx_data.eq(rx.rx_data),
         ]
         return m
@@ -131,15 +128,11 @@ class UARTRx(Elaboratable):
         self.rx_pin = Signal(reset=1)
         self.rx_rdy = Signal()
         self.rx_err = Signal()
-        self.dbg    = Signal(4)                     # XXX
-        # self.rx_ovf = Signal()  # XXX not used yet
         self.rx_data = Signal(data_bits)
         self.ports = (self.rx_pin,
                       self.rx_rdy,
                       self.rx_err,
-                      # self.rx_ovf,
                       self.rx_data,
-                      self.dbg,                     # XXX
                      )
 
     def elaborate(self, platform):
@@ -152,7 +145,6 @@ class UARTRx(Elaboratable):
         rx_resync_counter = Signal(range(-1, rx_resync_max + 1))
 
         m = Module()
-        m.d.comb += self.dbg[0].eq(rx_counter[-1])  # XXX
         with m.If(rx_counter[-1]):
             with m.FSM():
                 with m.State('IDLE'):

@@ -11,6 +11,7 @@ from uart import *
 from mixer import *
 from pwm import *
 from sim import *
+from term import connect_over_serial
 
 # --------------------------------------------------------------------------------------------------
 # Constants
@@ -65,9 +66,16 @@ def parse_args():
 	p_action = parser.add_subparsers(dest="action")
 	p_action.add_parser("simulate")
 	p_action.add_parser("generate")
-	p_action.add_parser("program")
+	p_program = p_action.add_parser("program")
+	p_program.add_argument('-i', '--interactive',
+		help = 'connect over UART after programming',
+		action = 'store_true')
+	p_action.add_parser("connect")
 
 	return parser.parse_args()
+
+def interactive():
+	connect_over_serial('ftdi://ftdi:2232:14:b/2', baudrate=9600)
 
 if __name__ == "__main__":
 	top = Module()
@@ -94,5 +102,10 @@ if __name__ == "__main__":
 		])
 
 		platform.build(top, do_program=True)
+
+		if args.interactive:
+			interactive()
+	elif args.action == "connect":
+		interactive()
 	else:
 		print("wat?")

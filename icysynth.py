@@ -29,9 +29,9 @@ CLK_PERIOD    = 1 / CLK_RATE
 
 class IcySynth(Elaboratable):
 	def __init__(self, num_channels: int, sample_cycs: int):
-		self.sound_out = Signal()
-		self.mixer     = Mixer(num_channels, sample_cycs)
-		self.pwm       = PWM()
+		self.o     = Signal()
+		self.mixer = Mixer(num_channels, sample_cycs)
+		self.pwm   = PWM()
 		pass
 
 	def elaborate(self, platform: Platform) -> Module:
@@ -48,12 +48,12 @@ class IcySynth(Elaboratable):
 		m.submodules.pwm = self.pwm
 
 		m.d.comb += [
-			self.pwm.i.eq(self.mixer.mixer_out[:8]),
-			self.sound_out.eq(self.pwm.o),
+			self.pwm.i.eq(self.mixer.o[:8]),
+			self.o.eq(self.pwm.o),
 		]
 
 		if platform:
-			m.d.comb += platform.request('sound_out').pin.eq(m.submodules.pwm.o)
+			m.d.comb += platform.request('sound_out').pin.eq(self.o)
 
 		return m
 

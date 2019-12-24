@@ -22,21 +22,12 @@ class Mixer(Elaboratable):
 		# -------------------------------------
 		# Inputs
 
-		self.inputs       = MixerState(num_channels)
-		self.we           = MixerEnable()
-		self.commit       = Signal()
-
-		self.chan_select  = Signal(range(num_channels))
-		self.chan_inputs  = WaveState()
-		self.chan_we      = WaveEnable()
-
-		self.noise_inputs = NoiseState()
-		self.noise_we     = NoiseEnable()
+		self.i = MixerInput(num_channels)
 
 		# -------------------------------------
 		# Outputs
 
-		self.mixer_out  = Signal(range(self.acc_range))
+		self.o = Signal(range(self.acc_range))
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
@@ -76,39 +67,39 @@ class Mixer(Elaboratable):
 
 		for i in range(self.num_channels):
 			m.d.comb += [
-				channels[i].commit.eq(self.commit),
-				channels[i].inputs.eq(self.chan_inputs),
+				channels[i].commit.eq(self.i.commit),
+				channels[i].inputs.eq(self.i.chan_inputs),
 			]
 
-			with m.If(self.chan_select == i):
-				m.d.comb += channels[i].we.eq(self.chan_we)
+			with m.If(self.i.chan_select == i):
+				m.d.comb += channels[i].we.eq(self.i.chan_we)
 
 		m.d.comb += [
-			noise.inputs.eq(self.noise_inputs),
-			noise.we.eq(self.noise_we),
-			noise.commit.eq(self.commit),
+			noise.inputs.eq(self.i.noise_inputs),
+			noise.we.eq(self.i.noise_we),
+			noise.commit.eq(self.i.commit),
 		]
 
-		sample_out = Signal(range(self.acc_range))
+		mixed_waves = Signal(range(self.acc_range))
 
-		m.d.comb += self.mixer_out.eq((sample_out + noise.sound_out) >> state.mix_shift)
+		m.d.comb += self.o.eq((mixed_waves + noise.sound_out) >> state.mix_shift)
 
 		# -------------------------------------
 		# Sequential Logic
 
 		m.d.sync += cycle_counter.eq(cycle_counter + 1)
 
-		with m.If(self.we.chan_enable):
-			m.d.sync += shadow.chan_enable.eq(self.inputs.chan_enable)
-		with m.If(self.we.mix_shift):
-			m.d.sync += shadow.mix_shift.eq(self.inputs.mix_shift)
+		with m.If(self.i.we.chan_enable):
+			m.d.sync += shadow.chan_enable.eq(self.i.inputs.chan_enable)
+		with m.If(self.i.we.mix_shift):
+			m.d.sync += shadow.mix_shift.eq(self.i.inputs.mix_shift)
 
 		# TODO: race condition between commit and update/accum.
 		# presumably it should only commit during wait state,
 		# but don't wanna lose commits that come in during not-wait states.
 		# or would this be handled at a higher interface layer?
 		# and this just outputs a signal saying if commits are OK?
-		with m.If(self.commit):
+		with m.If(self.i.commit):
 			m.d.sync += state.eq(shadow)
 
 		with m.FSM(name='mix_fsm') as fsm:
@@ -118,7 +109,7 @@ class Mixer(Elaboratable):
 					m.d.comb += channels[i].enabled.eq(state.chan_enable[i])
 
 				m.d.sync += [
-					sample_out.eq(acc),
+					mixed_waves.eq(acc),
 					acc.eq(0),
 				]
 

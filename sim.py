@@ -32,26 +32,26 @@ CHANNEL_INIT_VALUES = [
 ]
 
 def setup_channel(mix, i, values):
-	yield mix.chan_select.eq(i)
-	yield mix.chan_inputs.rate.eq(values['rate'])
-	yield mix.chan_inputs.length.eq(values['length'])
-	yield mix.chan_inputs.start.eq(values['start'])
-	yield mix.chan_inputs.vol.eq(values['vol'])
-	yield from toggle_enable(mix.chan_we.rate, mix.chan_we.sample, mix.chan_we.vol)
+	yield mix.i.chan_select.eq(i)
+	yield mix.i.chan_inputs.rate.eq(values['rate'])
+	yield mix.i.chan_inputs.length.eq(values['length'])
+	yield mix.i.chan_inputs.start.eq(values['start'])
+	yield mix.i.chan_inputs.vol.eq(values['vol'])
+	yield from toggle_enable(mix.i.chan_we.rate, mix.i.chan_we.sample, mix.i.chan_we.vol)
 
 def test_proc(mix):
 	# setup channels
 	for i in range(NUM_CHANNELS):
 		yield from setup_channel(mix, i, CHANNEL_INIT_VALUES[i])
 
-	yield mix.noise_inputs.vol.eq(3)
-	yield mix.noise_inputs.period.eq(50)
-	yield from toggle_enable(mix.noise_we.vol, mix.noise_we.period)
+	yield mix.i.noise_inputs.vol.eq(3)
+	yield mix.i.noise_inputs.period.eq(50)
+	yield from toggle_enable(mix.i.noise_we.vol, mix.i.noise_we.period)
 
 	# setup mixer state
-	yield mix.inputs.chan_enable.eq(0xFF)
-	yield from toggle_enable(mix.we.chan_enable)
-	yield from toggle_enable(mix.commit)
+	yield mix.i.inputs.chan_enable.eq(0xFF)
+	yield from toggle_enable(mix.i.we.chan_enable)
+	yield from toggle_enable(mix.i.commit)
 
 SIM_CLOCKS = 5000
 

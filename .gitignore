@@ -4,3 +4,5 @@ __pycache__/
 *.vcd
 .DS_STORE
 __MACOSX__
+*.sublime-project
+*.sublime-workspace

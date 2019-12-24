@@ -36,14 +36,16 @@ class SampleRam(Elaboratable):
 		# -------------------------------------
 		# Inputs
 
-		self.addr = Signal(9)
-		self.wdat = Signal(4)
-		self.we   = Signal(1)
+		self.waddr = Signal(9)
+		self.wdata = Signal(4)
+		self.we    = Signal(1)
+
+		self.raddr = Signal(9)
 
 		# -------------------------------------
 		# Outputs
 
-		self.rdat = Signal(4)
+		self.rdata = Signal(4)
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
@@ -59,12 +61,12 @@ class SampleRam(Elaboratable):
 		# Combinational Logic
 
 		m.d.comb += [
-			wrport.addr.eq(self.addr),
-			wrport.data.eq(self.wdat),
+			wrport.addr.eq(self.waddr),
+			wrport.data.eq(self.wdata),
 			wrport.en.  eq(self.we),
 
-			rdport.addr.eq(self.addr),
-			self.rdat.  eq(rdport.data),
+			rdport.addr.eq(self.raddr),
+			self.rdata. eq(rdport.data),
 		]
 
 		return m

@@ -10,6 +10,7 @@ from pll import *
 from uart import *
 from mixer import *
 from pwm import *
+from ram import *
 from sim import *
 from term import connect_over_serial
 
@@ -32,6 +33,7 @@ class IcySynth(Elaboratable):
 		self.o     = Signal()
 		self.mixer = Mixer(num_channels, sample_cycs)
 		self.pwm   = PWM()
+		self.ram   = SampleRam()
 		pass
 
 	def elaborate(self, platform: Platform) -> Module:
@@ -46,8 +48,11 @@ class IcySynth(Elaboratable):
 
 		m.submodules.mixer = self.mixer
 		m.submodules.pwm = self.pwm
+		m.submodules.ram = self.ram
 
 		m.d.comb += [
+			self.ram.raddr.eq(self.mixer.sample_ram_addr),
+			self.mixer.sample_ram_data.eq(self.ram.rdata),
 			self.pwm.i.eq(self.mixer.o[:8]),
 			self.o.eq(self.pwm.o),
 		]

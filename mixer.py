@@ -3,7 +3,6 @@ from nmigen.build import Platform
 
 from wave import *
 from noise import *
-from ram import *
 from rom import *
 from signals import *
 
@@ -23,11 +22,13 @@ class Mixer(Elaboratable):
 		# Inputs
 
 		self.i = MixerInput(num_channels)
+		self.sample_ram_data = Signal(4)
 
 		# -------------------------------------
 		# Outputs
 
 		self.o = Signal(range(self.acc_range))
+		self.sample_ram_addr  = Signal(9)
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
@@ -35,12 +36,10 @@ class Mixer(Elaboratable):
 		# -------------------------------------
 		# Submodules
 
-		sample_ram = SampleRam()
 		volume_rom = VolumeRom()
 		channels   = Array([WaveChannel(i) for i in range(self.num_channels)])
 		noise      = NoiseChannel()
 
-		m.submodules.sample_ram = sample_ram
 		m.submodules.volume_rom = volume_rom
 
 		for (i, c) in enumerate(channels):
@@ -120,8 +119,8 @@ class Mixer(Elaboratable):
 				with m.State(f'ACCUM{i}'):
 					with m.If(state.chan_enable[i]):
 						m.d.comb += [
-							sample_ram.addr.eq(channels[i].sample_addr),
-							volume_rom.addr.eq(Cat(sample_ram.rdat, channels[i].sample_vol)),
+							self.sample_ram_addr.eq(channels[i].sample_addr),
+							volume_rom.addr.eq(Cat(self.sample_ram_data, channels[i].sample_vol)),
 						]
 
 						m.d.sync += [

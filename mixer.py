@@ -5,24 +5,11 @@ from wave import *
 from noise import *
 from ram import *
 from rom import *
+from signals import *
 
 # --------------------------------------------------------------------------------------------------
 # Mixer
 # --------------------------------------------------------------------------------------------------
-
-class MixerState(Record):
-	def __init__(self, num_channels, name=None):
-		super().__init__([
-			('chan_enable',  num_channels),
-			('mix_shift',    2),
-		], name=name)
-
-class MixerEnable(Record):
-	def __init__(self):
-		super().__init__([
-			('chan_enable', 1),
-			('mix_shift',   1),
-		])
 
 class Mixer(Elaboratable):
 	def __init__(self, num_channels: int, sample_cycs: int):

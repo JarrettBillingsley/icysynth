@@ -1,31 +1,14 @@
 from nmigen import *
 from nmigen.build import Platform
 
+from signals import *
+
 # TODO: bodge
 from sim import *
 
 # --------------------------------------------------------------------------------------------------
 # Wave Channel
 # --------------------------------------------------------------------------------------------------
-
-class WaveState(Record):
-	def __init__(self, name=None):
-		super().__init__([
-			('phase',  24),
-			('rate',   24),
-			('start',  9),
-			('length', 9),
-			('vol',    4),
-		], name=name)
-
-class WaveEnable(Record):
-	def __init__(self):
-		super().__init__([
-			('phase',  1),
-			('rate',   1),
-			('sample', 1),
-			('vol',    1),
-		])
 
 class WaveChannel(Elaboratable):
 	def __init__(self, i):

@@ -1,23 +1,11 @@
 from nmigen import *
 from nmigen.build import Platform
 
+from signals import *
+
 # --------------------------------------------------------------------------------------------------
 # Noise Channel
 # --------------------------------------------------------------------------------------------------
-
-class NoiseState(Record):
-	def __init__(self, name=None):
-		super().__init__([
-			('period', 16),
-			('vol',    4),
-		], name=name)
-
-class NoiseEnable(Record):
-	def __init__(self):
-		super().__init__([
-			('period', 1),
-			('vol',    1),
-		])
 
 class NoiseChannel(Elaboratable):
 	def __init__(self):

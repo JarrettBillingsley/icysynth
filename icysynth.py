@@ -6,13 +6,14 @@ from nmigen.back import verilog
 from nmigen.back.pysim import *
 from nmigen.hdl.rec import *
 
-from pll import *
-from uart import *
 from mixer import *
+from pll import *
 from pwm import *
 from ram import *
+from serial_cmd import *
 from sim import *
 from term import connect_over_serial
+from uart import *
 
 # --------------------------------------------------------------------------------------------------
 # Constants
@@ -23,13 +24,17 @@ CLK_RATE      = 16777216
 SAMPLE_RATE   = 16384
 SAMPLE_CYCS   = CLK_RATE // SAMPLE_RATE
 CLK_PERIOD    = 1 / CLK_RATE
+BAUDRATE      = 9600
 
 # --------------------------------------------------------------------------------------------------
 # The synth as a single module
 # --------------------------------------------------------------------------------------------------
 
 class IcySynth(Elaboratable):
-	def __init__(self, num_channels: int, sample_cycs: int):
+	def __init__(self, num_channels: int, sample_cycs: int, baudrate: int):
+		self.num_channels = num_channels
+		self.baudrate = baudrate
+
 		self.o     = Signal()
 		self.mixer = Mixer(num_channels, sample_cycs)
 		self.pwm   = PWM()
@@ -39,6 +44,8 @@ class IcySynth(Elaboratable):
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
 
+		uart_freq = CLK_RATE
+
 		if platform:
 			pll = PLL(platform.default_clk_frequency / 1_000_000, CLK_RATE / 1_000_000)
 			# overrides the default 'sync' domain
@@ -46,19 +53,47 @@ class IcySynth(Elaboratable):
 			m.submodules.pll = pll
 			m.d.comb += pll.clk_pin.eq(platform.request(platform.default_clk, dir='-'))
 
+			uart_freq = pll.best_fout
+
 		m.submodules.mixer = self.mixer
-		m.submodules.pwm = self.pwm
-		m.submodules.ram = self.ram
+		m.submodules.pwm   = self.pwm
+		m.submodules.ram   = self.ram
+
+		self.cmd = UartCmd(self.num_channels, self.baudrate, uart_freq)
+		m.submodules.cmd   = self.cmd
 
 		m.d.comb += [
+			# CMD -> RAM
+			self.ram.waddr.eq(self.cmd.o.ram_waddr),
+			self.ram.wdata.eq(self.cmd.o.ram_wdata),
+			self.ram.we.eq(self.cmd.o.ram_we),
+
+			# CMD -> Mixer
+			self.mixer.i.eq(self.cmd.o),
+
+			# Mixer <-> RAM
 			self.ram.raddr.eq(self.mixer.sample_ram_addr),
 			self.mixer.sample_ram_data.eq(self.ram.rdata),
+
+			# Mixer -> PWM
 			self.pwm.i.eq(self.mixer.o[:8]),
+
+			# PWM -> Out
 			self.o.eq(self.pwm.o),
 		]
 
 		if platform:
-			m.d.comb += platform.request('sound_out').pin.eq(self.o)
+			m.d.comb += [
+				# Pins -> UART
+				self.cmd.rx.eq(platform.request('uart').rx),
+
+				# UART -> LEDs
+				platform.request('led', 3).eq(self.cmd.o_err_status),
+				platform.request('led', 4).eq(self.cmd.o_recv_status),
+
+				# Sound -> THE WORLD
+				platform.request('sound_out').pin.eq(self.o),
+			]
 
 		return m
 
@@ -84,7 +119,7 @@ def interactive():
 
 if __name__ == "__main__":
 	top = Module()
-	dut = IcySynth(NUM_CHANNELS, SAMPLE_CYCS)
+	dut = IcySynth(NUM_CHANNELS, SAMPLE_CYCS, BAUDRATE)
 	top.submodules.synth = dut
 	args = parse_args()
 

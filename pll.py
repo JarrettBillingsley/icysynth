@@ -71,6 +71,7 @@ class PLL(Elaboratable):
             warnings.warn(
                 f'PLL: requested {f_req} MHz, got {best_fout} MHz)',
                 stacklevel=3)
+        self.best_fout = best_fout
         return best
 
     def elaborate(self, platform):

@@ -60,6 +60,14 @@ class MixerInputLayout(Layout):
 			('noise_we',     NoiseEnableLayout()           ),
 		])
 
+class CommandOutputLayout(Layout):
+	def __init__(self, num_channels): super().__init__([
+			('mixer_i',   MixerInputLayout(num_channels)),
+			('ram_waddr', 9),
+			('ram_wdata', 4),
+			('ram_we',    1),
+		])
+
 # --------------------------------------------------------------------------------------------------
 # Records
 # --------------------------------------------------------------------------------------------------
@@ -81,3 +89,6 @@ class WaveEnable(Record):
 
 class MixerInput(Record):
 	def __init__(self, n): super().__init__(MixerInputLayout(n))
+
+class CommandOutput(Record):
+	def __init__(self, n): super().__init__(CommandOutputLayout(n))

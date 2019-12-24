@@ -35,13 +35,16 @@ class Mixer(Elaboratable):
 		# -------------------------------------
 		# Inputs
 
-		self.inputs      = MixerState(num_channels)
-		self.we          = MixerEnable()
-		self.commit      = Signal()
+		self.inputs       = MixerState(num_channels)
+		self.we           = MixerEnable()
+		self.commit       = Signal()
 
-		self.chan_select = Signal(range(num_channels))
-		self.chan_inputs = WaveState()
-		self.chan_we     = WaveEnable()
+		self.chan_select  = Signal(range(num_channels))
+		self.chan_inputs  = WaveState()
+		self.chan_we      = WaveEnable()
+
+		self.noise_inputs = NoiseState()
+		self.noise_we     = NoiseEnable()
 
 		# -------------------------------------
 		# Outputs
@@ -92,6 +95,12 @@ class Mixer(Elaboratable):
 
 			with m.If(self.chan_select == i):
 				m.d.comb += channels[i].we.eq(self.chan_we)
+
+		m.d.comb += [
+			noise.inputs.eq(self.noise_inputs),
+			noise.we.eq(self.noise_we),
+			noise.commit.eq(self.commit),
+		]
 
 		sample_out = Signal(range(self.acc_range))
 

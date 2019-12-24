@@ -48,9 +48,9 @@ class NoiseChannel(Elaboratable):
 
 		lfsr.reset = 1
 
-		# if platform:
-		state.period.reset = 50
-		state.vol.reset    = 0xF
+		if platform:
+			state.period.reset = 50
+			state.vol.reset    = 0xF
 
 		# -------------------------------------
 		# Combinational Logic
@@ -65,6 +65,7 @@ class NoiseChannel(Elaboratable):
 			m.d.sync += [
 				counter.eq(state.period),
 				lfsr.eq(Cat(lfsr[1:15], lfsr[0] ^ lfsr[1])),
+				# TODO: BZZ mode (feedback is 0 ^ 6)
 			]
 		with m.Else():
 			m.d.sync += counter.eq(counter - 1)

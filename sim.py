@@ -44,6 +44,10 @@ def test_proc(mix):
 	for i in range(NUM_CHANNELS):
 		yield from setup_channel(mix, i, CHANNEL_INIT_VALUES[i])
 
+	yield mix.noise_inputs.vol.eq(3)
+	yield mix.noise_inputs.period.eq(50)
+	yield from toggle_enable(mix.noise_we.vol, mix.noise_we.period)
+
 	# setup mixer state
 	yield mix.inputs.chan_enable.eq(0xFF)
 	yield from toggle_enable(mix.we.chan_enable)

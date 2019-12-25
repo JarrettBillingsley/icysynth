@@ -2,7 +2,8 @@ from nmigen import *
 from nmigen.build import Platform
 from nmigen.back.pysim import *
 
-NUM_CHANNELS  = 8
+# TODO: bodge (duplicated constants)
+NUM_CHANNELS  = 4
 CLK_RATE      = 16777216
 SAMPLE_RATE   = 16384
 SAMPLE_CYCS   = CLK_RATE // SAMPLE_RATE
@@ -39,6 +40,9 @@ def setup_channel(mix, i, values):
 	yield mix.i.chan_inputs.vol.eq(values['vol'])
 	yield from toggle_enable(mix.i.chan_we.rate, mix.i.chan_we.sample, mix.i.chan_we.vol)
 
+def delay(n):
+    return [None] * n
+
 def test_proc(mix):
 	# setup channels
 	for i in range(NUM_CHANNELS):
@@ -49,9 +53,35 @@ def test_proc(mix):
 	yield from toggle_enable(mix.i.noise_we.vol, mix.i.noise_we.period)
 
 	# setup mixer state
-	yield mix.i.inputs.chan_enable.eq(0xFF)
-	yield from toggle_enable(mix.i.we.chan_enable)
+	yield mix.i.inputs.chan_enable.eq(0x0F)
+	yield mix.i.inputs.mix_shift.eq(0)
+	yield from toggle_enable(mix.i.we.chan_enable, mix.i.we.mix_shift)
 	yield from toggle_enable(mix.i.commit)
+
+def serial_send(rx, divisor, data):
+	yield rx.eq(1)
+	yield from delay(3)
+
+	# start bit
+	yield rx.eq(0)
+	yield from delay(divisor)
+
+	# data bits
+	for i in range(8):
+		yield rx.eq((data >> i) & 1)
+		yield from delay(divisor)
+
+	# stop bit
+	yield rx.eq(1)
+	yield from delay(divisor + 2)
+
+
+def test_proc2(cmd):
+	d = cmd.uart_rx.divisor
+	yield from delay(2)
+	yield from serial_send(cmd.rx, d, ord('1'))
+	yield from serial_send(cmd.rx, d, ord('2'))
+	yield from serial_send(cmd.rx, d, ord('3'))
 
 SIM_CLOCKS = 5000
 
@@ -61,6 +91,7 @@ def simulate(top, dut):
 
 	def fuckyou():
 		yield from test_proc(dut.mixer)
+		# yield from test_proc2(dut.cmd)
 	sim.add_sync_process(fuckyou)
 
 	# BUG: nmigen currently ignores the 'traces' param on this function,

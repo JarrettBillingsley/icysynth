@@ -19,7 +19,8 @@ from uart import *
 # Constants
 # --------------------------------------------------------------------------------------------------
 
-NUM_CHANNELS  = 8
+# TODO: bodge (duplicated constants)
+NUM_CHANNELS  = 4
 CLK_RATE      = 16777216
 SAMPLE_RATE   = 16384
 SAMPLE_CYCS   = CLK_RATE // SAMPLE_RATE
@@ -44,7 +45,9 @@ class IcySynth(Elaboratable):
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
 
-		uart_freq = CLK_RATE
+		# for simulation, set it to BAUDRATE * 5 so that it doesn't take
+		# an age for each bit transition
+		uart_freq = BAUDRATE * 5
 
 		if platform:
 			pll = PLL(platform.default_clk_frequency / 1_000_000, CLK_RATE / 1_000_000)
@@ -88,7 +91,7 @@ class IcySynth(Elaboratable):
 				self.cmd.rx.eq(platform.request('uart').rx),
 
 				# UART -> LEDs
-				platform.request('led', 3).eq(self.cmd.o_err_status),
+				# platform.request('led', 3).eq(self.cmd.o_err_status),
 				platform.request('led', 4).eq(self.cmd.o_recv_status),
 
 				# Sound -> THE WORLD
@@ -115,8 +118,7 @@ def parse_args():
 	return parser.parse_args()
 
 def interactive():
-	# TODO: this is not robust at all.
-	connect_over_serial('ftdi://ftdi:2232:14:c/2', baudrate = BAUDRATE)
+	connect_over_serial('ftdi://ftdi:2232/2', baudrate = BAUDRATE)
 
 if __name__ == "__main__":
 	top = Module()

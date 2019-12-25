@@ -28,6 +28,11 @@ class WaveChannel(Elaboratable):
 		self.sample_addr = Signal(9)
 		self.sample_vol  = Signal(4)
 
+		# -------------------------------------
+		# Juicy Internals
+
+		self.internal_state = WaveState(name = 'real')
+
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
 
@@ -36,7 +41,7 @@ class WaveChannel(Elaboratable):
 
 		phase_dirty = Signal(1)
 		shadow      = WaveState(name='shadow')
-		state       = WaveState(name='real')
+		state       = self.internal_state
 
 		if platform:
 			shadow.rate.reset   = CHANNEL_INIT_VALUES[self.index]['rate']
@@ -60,8 +65,8 @@ class WaveChannel(Elaboratable):
 		# Sequential Logic
 
 		# Processing
-		with m.If(self.enabled):
-			m.d.sync += state.phase.eq((state.phase + state.rate)[0:24])
+		# with m.If(self.enabled):
+			# m.d.sync += state.phase.eq((state.phase + state.rate)[0:24])
 
 		# Writing to shadow state
 		with m.If(self.we.phase):
@@ -90,7 +95,7 @@ class WaveChannel(Elaboratable):
 
 			with m.If(phase_dirty):
 				m.d.sync += [
-					state.phase.eq(shadow.phase),
+					# state.phase.eq(shadow.phase), TODO: temp
 					phase_dirty.eq(0),
 				]
 

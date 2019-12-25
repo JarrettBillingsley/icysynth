@@ -102,17 +102,21 @@ class Mixer(Elaboratable):
 			m.d.sync += state.eq(shadow)
 
 		with m.FSM(name='mix_fsm') as fsm:
-			with m.State('UPDATE'):
+			with m.State('OUTPUT'):
 				# ASSUME: cycle_counter == 0
-				for i in range(self.num_channels):
-					m.d.comb += channels[i].enabled.eq(state.chan_enable[i])
-
 				m.d.sync += [
 					mixed_waves.eq(acc),
 					acc.eq(0),
 				]
 
-				m.next = 'ACCUM0'
+				m.next = 'UPDATE0'
+
+			for i in range(self.num_channels):
+				with m.State(f'UPDATE{i}'):
+					with m.If(state.chan_enable[i]):
+						s = channels[i].internal_state
+						m.d.sync += s.phase.eq((s.phase + s.rate)[:24])
+					m.next = f'ACCUM{i}'
 
 			for i in range(self.num_channels):
 				# ASSUME: cycle_counter == 1 .. num_channels
@@ -130,13 +134,13 @@ class Mixer(Elaboratable):
 					if i == self.num_channels - 1:
 						m.next = 'WAIT'
 					else:
-						m.next = f'ACCUM{i+1}'
+						m.next = f'UPDATE{i+1}'
 
 			with m.State('WAIT'):
 				# ASSUME: cycle_counter == num_channels + 1 .. sample_cycs - 1
 
 				with m.If(cycle_counter == self.sample_cycs - 1):
 					m.d.sync += cycle_counter.eq(0)
-					m.next = 'UPDATE'
+					m.next = 'OUTPUT'
 
 		return m

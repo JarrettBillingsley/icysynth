@@ -45,8 +45,6 @@ class UartCmd(Elaboratable):
 		# Outputs
 
 		self.o             = CommandOutput(num_channels)
-		self.o_recv_status = Signal()
-		self.o_err_status  = Signal()
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
@@ -55,21 +53,11 @@ class UartCmd(Elaboratable):
 		status_duration = int(0.1 * self.clk_freq)
 
 		uart_rx         = UARTRx(divisor = uart_divisor)
-		recv_status     = OneShot(duration = status_duration, name="recv")
-		err_status      = OneShot(duration = status_duration, name="err")
 
 		self.uart_rx = uart_rx
 		m.submodules.uart_rx     = uart_rx
-		m.submodules.recv_status = recv_status
-		m.submodules.err_status  = err_status
 
-		m.d.comb += [
-			uart_rx.rx_pin    .eq(self.rx        ),
-			recv_status.trg   .eq(uart_rx.rx_rdy ),
-			err_status.trg    .eq(uart_rx.rx_err ),
-			self.o_recv_status.eq(recv_status.out),
-			self.o_err_status .eq(err_status.out),
-		]
+		m.d.comb += uart_rx.rx_pin.eq(self.rx)
 
 		chan_enable = Signal(self.num_channels, reset = (1 << self.num_channels) - 1)
 

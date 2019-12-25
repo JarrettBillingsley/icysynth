@@ -141,8 +141,8 @@ class UARTRx(Elaboratable):
         rx_counter = Signal(range(-1, rx_max + 1), reset=~0)
         rx_data = Signal(self.data_bits)
         rx_bits = Signal(range(-1, self.data_bits - 1))
-        rx_resync_max = 10 * self.divisor - 2
-        rx_resync_counter = Signal(range(-1, rx_resync_max + 1))
+        # rx_resync_max = 10 * self.divisor - 2
+        # rx_resync_counter = Signal(range(-1, rx_resync_max + 1))
 
         m = Module()
         with m.If(rx_counter[-1]):
@@ -164,19 +164,19 @@ class UARTRx(Elaboratable):
                         ]
                         m.next = 'IDLE'
                 with m.State('START'):
-                    with m.If(self.rx_pin):
-                        m.d.sync += [
-                            self.rx_err.eq(True),
-                            rx_counter.eq(-1),
-                            rx_resync_counter.eq(rx_resync_max),
-                        ]
-                        m.next = 'RESYNC'
-                    with m.Else():
-                        m.d.sync += [
-                            rx_bits.eq(self.data_bits - 2),
-                            rx_counter.eq(self.divisor - 2),
-                        ]
-                        m.next = 'DATA'
+                    # with m.If(self.rx_pin):
+                    #     m.d.sync += [
+                    #         self.rx_err.eq(True),
+                    #         rx_counter.eq(-1),
+                    #         rx_resync_counter.eq(rx_resync_max),
+                    #     ]
+                    #     m.next = 'RESYNC'
+                    # with m.Else():
+                    m.d.sync += [
+                        rx_bits.eq(self.data_bits - 2),
+                        rx_counter.eq(self.divisor - 2),
+                    ]
+                    m.next = 'DATA'
                 with m.State('DATA'):
                     m.d.sync += [
                         rx_data.eq(Cat(rx_data[1:], self.rx_pin)),
@@ -190,38 +190,38 @@ class UARTRx(Elaboratable):
                         ]
                         m.next = 'DATA'
                 with m.State('STOP'):
-                    with m.If(~self.rx_pin):
-                        m.d.sync += [
-                            self.rx_err.eq(True),
-                            rx_resync_counter.eq(rx_resync_max),
-                            rx_counter.eq(-1),
-                        ]
-                        m.next = 'RESYNC'
-                    with m.Else():
-                        m.d.sync += [
-                            self.rx_data.eq(rx_data),
-                            self.rx_rdy.eq(True),
-                        ]
-                        m.next = 'IDLE'
-
-                with m.State('RESYNC'):
+                    # with m.If(~self.rx_pin):
+                    #     m.d.sync += [
+                    #         self.rx_err.eq(True),
+                    #         rx_resync_counter.eq(rx_resync_max),
+                    #         rx_counter.eq(-1),
+                    #     ]
+                    #     m.next = 'RESYNC'
+                    # with m.Else():
                     m.d.sync += [
-                        self.rx_err.eq(False),
-                        rx_counter.eq(-1),
+                        self.rx_data.eq(rx_data),
+                        self.rx_rdy.eq(True),
                     ]
-                    with m.If(self.rx_pin):
-                        with m.If(rx_resync_counter[-1]):
-                            m.next = 'IDLE'
-                        with m.Else():
-                            m.d.sync += [
-                                rx_resync_counter.eq(rx_resync_counter - 1),
-                            ]
-                            m.next = 'RESYNC'
-                    with m.Else():
-                        m.d.sync += [
-                            rx_resync_counter.eq(rx_resync_max),
-                        ]
-                        m.next = 'RESYNC'
+                    m.next = 'IDLE'
+
+                # with m.State('RESYNC'):
+                #     m.d.sync += [
+                #         self.rx_err.eq(False),
+                #         rx_counter.eq(-1),
+                #     ]
+                #     with m.If(self.rx_pin):
+                #         with m.If(rx_resync_counter[-1]):
+                #             m.next = 'IDLE'
+                #         with m.Else():
+                #             m.d.sync += [
+                #                 rx_resync_counter.eq(rx_resync_counter - 1),
+                #             ]
+                #             m.next = 'RESYNC'
+                #     with m.Else():
+                #         m.d.sync += [
+                #             rx_resync_counter.eq(rx_resync_max),
+                #         ]
+                #         m.next = 'RESYNC'
         with m.Else():
             m.d.sync += [
                 rx_counter.eq(rx_counter - 1),

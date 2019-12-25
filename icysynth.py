@@ -90,10 +90,6 @@ class IcySynth(Elaboratable):
 				# Pins -> UART
 				self.cmd.rx.eq(platform.request('uart').rx),
 
-				# UART -> LEDs
-				# platform.request('led', 3).eq(self.cmd.o_err_status),
-				platform.request('led', 4).eq(self.cmd.o_recv_status),
-
 				# Sound -> THE WORLD
 				platform.request('sound_out').pin.eq(self.o),
 			]
@@ -112,6 +108,9 @@ def parse_args():
 	p_program = p_action.add_parser("program")
 	p_program.add_argument('-i', '--interactive',
 		help = 'connect over UART after programming',
+		action = 'store_true')
+	p_program.add_argument('-d', '--dry-run',
+		help = 'build, but don\'t program',
 		action = 'store_true')
 	p_action.add_parser("connect")
 
@@ -144,7 +143,7 @@ if __name__ == "__main__":
 			)
 		])
 
-		platform.build(top, do_program=True)
+		platform.build(top, do_program = not args.dry_run)
 
 		if args.interactive:
 			interactive()

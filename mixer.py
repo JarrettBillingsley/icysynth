@@ -59,7 +59,7 @@ class Mixer(Elaboratable):
 		cycle_counter = Signal(range(self.sample_cycs))
 
 		if platform:
-			state.chan_enable.reset = 0xFF
+			state.chan_enable.reset = ~0
 
 		# -------------------------------------
 		# Combinational Logic

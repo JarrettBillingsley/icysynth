@@ -39,6 +39,8 @@ class NoiseChannel(Elaboratable):
 		if platform:
 			state.period.reset = 50
 			state.vol.reset    = 0xF
+			shadow.period.reset = 50
+			shadow.vol.reset    = 0xF
 
 		# -------------------------------------
 		# Combinational Logic

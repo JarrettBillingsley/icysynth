@@ -39,6 +39,10 @@ class WaveChannel(Elaboratable):
 		state       = WaveState(name='real')
 
 		if platform:
+			shadow.rate.reset   = CHANNEL_INIT_VALUES[self.index]['rate']
+			shadow.length.reset = CHANNEL_INIT_VALUES[self.index]['length']
+			shadow.start.reset  = CHANNEL_INIT_VALUES[self.index]['start']
+			shadow.vol.reset    = CHANNEL_INIT_VALUES[self.index]['vol']
 			state.rate.reset   = CHANNEL_INIT_VALUES[self.index]['rate']
 			state.length.reset = CHANNEL_INIT_VALUES[self.index]['length']
 			state.start.reset  = CHANNEL_INIT_VALUES[self.index]['start']

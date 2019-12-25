@@ -19,6 +19,18 @@ class MixerEnableLayout(Layout):
 			('mix_shift',   1),
 		])
 
+class MixerInputLayout(Layout):
+	def __init__(self, num_channels): super().__init__([
+			('inputs',       MixerStateLayout(num_channels)),
+			('we',           MixerEnableLayout()           ),
+			('commit',       1                             ),
+			('chan_select',  range(num_channels)           ),
+			('chan_inputs',  WaveStateLayout()             ),
+			('chan_we',      WaveEnableLayout()            ),
+			('noise_inputs', NoiseStateLayout()            ),
+			('noise_we',     NoiseEnableLayout()           ),
+		])
+
 class WaveStateLayout(Layout):
 	def __init__(self): super().__init__([
 			('phase',  24),
@@ -46,18 +58,6 @@ class NoiseEnableLayout(Layout):
 	def __init__(self): super().__init__([
 			('period', 1),
 			('vol',    1),
-		])
-
-class MixerInputLayout(Layout):
-	def __init__(self, num_channels): super().__init__([
-			('inputs',       MixerStateLayout(num_channels)),
-			('we',           MixerEnableLayout()           ),
-			('commit',       1                             ),
-			('chan_select',  range(num_channels)           ),
-			('chan_inputs',  WaveStateLayout()             ),
-			('chan_we',      WaveEnableLayout()            ),
-			('noise_inputs', NoiseStateLayout()            ),
-			('noise_we',     NoiseEnableLayout()           ),
 		])
 
 class CommandOutputLayout(Layout):

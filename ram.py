@@ -54,7 +54,7 @@ class SampleRam(Elaboratable):
 		# Submodules
 
 		mem = Memory(width = 4, depth = 512, init = DUMMY_RAM)
-		m.submodules.rdport = rdport = mem.read_port()
+		m.submodules.rdport = rdport = mem.read_port(domain = 'comb')
 		m.submodules.wrport = wrport = mem.write_port()
 
 		# -------------------------------------

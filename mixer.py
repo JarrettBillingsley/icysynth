@@ -15,7 +15,7 @@ class Mixer(Elaboratable):
 		assert sample_cycs >= num_channels + 2, "sample period too short!"
 
 		self.num_channels = num_channels
-		self.acc_range = 0xFF * num_channels
+		self.acc_range = 0xFF * (num_channels + 1)
 		self.sample_cycs = sample_cycs
 
 		# -------------------------------------

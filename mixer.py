@@ -50,13 +50,12 @@ class Mixer(Elaboratable):
 		# -------------------------------------
 		# Internal state
 
-		shadow = MixerState(self.num_channels, name='shadow')
-		state  = MixerState(self.num_channels, name='real')
-		shadow.mix_shift.reset = 3
+		state  = MixerState(self.num_channels)
 		state.mix_shift.reset = 3
 
 		acc           = Signal(range(self.acc_range))
 		cycle_counter = Signal(range(self.sample_cycs))
+		phase_reset   = Signal(self.num_channels)
 
 		if platform:
 			state.chan_enable.reset = ~0
@@ -65,10 +64,7 @@ class Mixer(Elaboratable):
 		# Combinational Logic
 
 		for i in range(self.num_channels):
-			m.d.comb += [
-				channels[i].commit.eq(self.i.commit),
-				channels[i].inputs.eq(self.i.chan_inputs),
-			]
+			m.d.comb += channels[i].inputs.eq(self.i.chan_inputs)
 
 			with m.If(self.i.chan_select == i):
 				m.d.comb += channels[i].we.eq(self.i.chan_we)
@@ -76,7 +72,6 @@ class Mixer(Elaboratable):
 		m.d.comb += [
 			noise.inputs.eq(self.i.noise_inputs),
 			noise.we.eq(self.i.noise_we),
-			noise.commit.eq(self.i.commit),
 		]
 
 		mixed_waves = Signal(range(self.acc_range))
@@ -88,18 +83,13 @@ class Mixer(Elaboratable):
 
 		m.d.sync += cycle_counter.eq(cycle_counter + 1)
 
-		with m.If(self.i.we.chan_enable):
-			m.d.sync += shadow.chan_enable.eq(self.i.inputs.chan_enable)
-		with m.If(self.i.we.mix_shift):
-			m.d.sync += shadow.mix_shift.eq(self.i.inputs.mix_shift)
+		with m.If(self.i.chan_we.phase):
+			m.d.sync += phase_reset.eq(phase_reset | i << self.i.chan_select)
 
-		# TODO: race condition between commit and update/accum.
-		# presumably it should only commit during wait state,
-		# but don't wanna lose commits that come in during not-wait states.
-		# or would this be handled at a higher interface layer?
-		# and this just outputs a signal saying if commits are OK?
-		with m.If(self.i.commit):
-			m.d.sync += state.eq(shadow)
+		with m.If(self.i.we.chan_enable):
+			m.d.sync += state.chan_enable.eq(self.i.inputs.chan_enable)
+		with m.If(self.i.we.mix_shift):
+			m.d.sync += state.mix_shift.eq(self.i.inputs.mix_shift)
 
 		with m.FSM(name='mix_fsm') as fsm:
 			with m.State('OUTPUT'):
@@ -107,6 +97,7 @@ class Mixer(Elaboratable):
 				m.d.sync += [
 					mixed_waves.eq(acc),
 					acc.eq(0),
+					phase_reset.eq(0),
 				]
 
 				m.next = 'UPDATE0'
@@ -114,8 +105,10 @@ class Mixer(Elaboratable):
 			for i in range(self.num_channels):
 				with m.State(f'UPDATE{i}'):
 					with m.If(state.chan_enable[i]):
-						s = channels[i].internal_state
-						m.d.sync += s.phase.eq((s.phase + s.rate)[:24])
+						with m.If(phase_reset[i]):
+							channels[i].reset_phase(m)
+						with m.Else():
+							channels[i].update_phase(m)
 					m.next = f'ACCUM{i}'
 
 			for i in range(self.num_channels):

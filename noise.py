@@ -14,7 +14,6 @@ class NoiseChannel(Elaboratable):
 
 		self.inputs      = NoiseState()
 		self.we          = NoiseEnable()
-		self.commit      = Signal()
 
 		# TODO: BZZ mode
 
@@ -29,8 +28,7 @@ class NoiseChannel(Elaboratable):
 		# -------------------------------------
 		# Internal State
 
-		shadow  = NoiseState(name='shadow')
-		state   = NoiseState(name='real')
+		state   = NoiseState()
 		lfsr    = Signal(15)
 		counter = Signal(16)
 
@@ -39,8 +37,6 @@ class NoiseChannel(Elaboratable):
 		if platform:
 			state.period.reset = 50
 			state.vol.reset    = 0xF
-			shadow.period.reset = 50
-			shadow.vol.reset    = 0xF
 
 		# -------------------------------------
 		# Combinational Logic
@@ -60,14 +56,10 @@ class NoiseChannel(Elaboratable):
 		with m.Else():
 			m.d.sync += counter.eq(counter - 1)
 
-		# Writing to shadow state
+		# Writing to state
 		with m.If(self.we.period):
-			m.d.sync += shadow.period.eq(self.inputs.period)
+			m.d.sync += state.period.eq(self.inputs.period)
 		with m.If(self.we.vol):
-			m.d.sync += shadow.vol.eq(self.inputs.vol)
-
-		# Committing shadow state to real state
-		with m.If(self.commit):
-			m.d.sync += state.eq(shadow)
+			m.d.sync += state.vol.eq(self.inputs.vol)
 
 		return m

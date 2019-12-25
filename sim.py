@@ -3,7 +3,7 @@ from nmigen.build import Platform
 from nmigen.back.pysim import *
 
 # TODO: bodge (duplicated constants)
-NUM_CHANNELS  = 4
+NUM_CHANNELS  = 8
 CLK_RATE      = 16777216
 SAMPLE_RATE   = 16384
 SAMPLE_CYCS   = CLK_RATE // SAMPLE_RATE
@@ -56,7 +56,6 @@ def test_proc(mix):
 	yield mix.i.inputs.chan_enable.eq(0x0F)
 	yield mix.i.inputs.mix_shift.eq(0)
 	yield from toggle_enable(mix.i.we.chan_enable, mix.i.we.mix_shift)
-	yield from toggle_enable(mix.i.commit)
 
 def serial_send(rx, divisor, data):
 	yield rx.eq(1)

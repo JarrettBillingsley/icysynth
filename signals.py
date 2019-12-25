@@ -23,7 +23,6 @@ class MixerInputLayout(Layout):
 	def __init__(self, num_channels): super().__init__([
 			('inputs',       MixerStateLayout(num_channels)),
 			('we',           MixerEnableLayout()           ),
-			('commit',       1                             ),
 			('chan_select',  range(num_channels)           ),
 			('chan_inputs',  WaveStateLayout()             ),
 			('chan_we',      WaveEnableLayout()            ),

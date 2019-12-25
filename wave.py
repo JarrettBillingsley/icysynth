@@ -19,7 +19,6 @@ class WaveChannel(Elaboratable):
 
 		self.inputs      = WaveState()
 		self.we          = WaveEnable()
-		self.commit      = Signal()
 		self.enabled     = Signal()
 
 		# -------------------------------------
@@ -31,7 +30,7 @@ class WaveChannel(Elaboratable):
 		# -------------------------------------
 		# Juicy Internals
 
-		self.internal_state = WaveState(name = 'real')
+		self.internal_state = WaveState()
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
@@ -39,15 +38,9 @@ class WaveChannel(Elaboratable):
 		# -------------------------------------
 		# Internal State
 
-		phase_dirty = Signal(1)
-		shadow      = WaveState(name='shadow')
-		state       = self.internal_state
+		state = self.internal_state
 
 		if platform:
-			shadow.rate.reset   = CHANNEL_INIT_VALUES[self.index]['rate']
-			shadow.length.reset = CHANNEL_INIT_VALUES[self.index]['length']
-			shadow.start.reset  = CHANNEL_INIT_VALUES[self.index]['start']
-			shadow.vol.reset    = CHANNEL_INIT_VALUES[self.index]['vol']
 			state.rate.reset   = CHANNEL_INIT_VALUES[self.index]['rate']
 			state.length.reset = CHANNEL_INIT_VALUES[self.index]['length']
 			state.start.reset  = CHANNEL_INIT_VALUES[self.index]['start']
@@ -64,39 +57,21 @@ class WaveChannel(Elaboratable):
 		# -------------------------------------
 		# Sequential Logic
 
-		# Processing
-		# with m.If(self.enabled):
-			# m.d.sync += state.phase.eq((state.phase + state.rate)[0:24])
-
-		# Writing to shadow state
-		with m.If(self.we.phase):
-			m.d.sync += [
-				shadow.phase.eq(self.inputs.phase),
-				phase_dirty.eq(1),
-			]
 		with m.If(self.we.rate):
-			m.d.sync += shadow.rate.eq(self.inputs.rate)
+			m.d.sync += state.rate.eq(self.inputs.rate)
 		with m.If(self.we.sample):
 			m.d.sync += [
-				shadow.start.eq(self.inputs.start),
-				shadow.length.eq(self.inputs.length),
+				state.start.eq(self.inputs.start),
+				state.length.eq(self.inputs.length),
 			]
 		with m.If(self.we.vol):
-			m.d.sync += shadow.vol.eq(self.inputs.vol)
-
-		# Committing shadow state to real state
-		with m.If(self.commit):
-			m.d.sync += [
-				state.rate.  eq(shadow.rate  ),
-				state.start. eq(shadow.start ),
-				state.length.eq(shadow.length),
-				state.vol.   eq(shadow.vol   ),
-			]
-
-			with m.If(phase_dirty):
-				m.d.sync += [
-					# state.phase.eq(shadow.phase), TODO: temp
-					phase_dirty.eq(0),
-				]
+			m.d.sync += state.vol.eq(self.inputs.vol)
 
 		return m
+
+	def update_phase(self, m: Module):
+		s = self.internal_state
+		m.d.sync += s.phase.eq((s.phase + s.rate)[:24])
+
+	def reset_phase(self, m: Module):
+		m.d.sync += self.internal_state.phase.eq(0)

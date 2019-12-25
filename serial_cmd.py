@@ -82,13 +82,8 @@ class UartCmd(Elaboratable):
 			with m.State('TICKLE'):
 				m.d.sync += [
 					self.o.mixer_i.we.chan_enable.eq(0),
-					self.o.mixer_i.commit.eq(1),
 				]
 
-				m.next = 'BLOOP'
-
-			with m.State('BLOOP'):
-				m.d.sync += self.o.mixer_i.commit.eq(0)
 				m.next = 'IDLE'
 
 		return m

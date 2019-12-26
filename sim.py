@@ -18,10 +18,10 @@ def toggle_enable(*sig):
 
 def setup_channel(samp, i, values):
 	yield samp.i.chan_select.eq(i)
-	yield samp.i.chan_inputs.rate.eq(values['rate'])
-	yield samp.i.chan_inputs.length.eq(values['length'])
-	yield samp.i.chan_inputs.start.eq(values['start'])
-	yield samp.i.chan_inputs.vol.eq(values['vol'])
+	yield samp.i.chan_i.rate.eq(values['rate'])
+	yield samp.i.chan_i.length.eq(values['length'])
+	yield samp.i.chan_i.start.eq(values['start'])
+	yield samp.i.chan_i.vol.eq(values['vol'])
 	yield from toggle_enable(samp.i.chan_we.rate, samp.i.chan_we.sample, samp.i.chan_we.vol)
 
 def delay(n):

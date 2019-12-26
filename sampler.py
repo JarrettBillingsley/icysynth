@@ -34,17 +34,12 @@ class Sampler(Elaboratable):
 		# -------------------------------------
 		# Submodules
 
-		volume_rom = VolumeRom()
-		channels   = Array([WaveChannel(i) for i in range(self.num_channels)])
-
-		m.submodules.volume_rom = volume_rom
-
-		for (i, c) in enumerate(channels):
-			m.submodules[f'ch_{i}'] = c
+		m.submodules.volume_rom = volume_rom = VolumeRom()
 
 		# -------------------------------------
 		# Internal state
 
+		channels      = Array([WaveState(name = f'ch_{i}') for i in range(self.num_channels)])
 		acc           = Signal(range(self.acc_range))
 		cycle_counter = Signal(range(self.sample_cycs))
 		chan_enable   = Signal(self.num_channels)
@@ -53,67 +48,62 @@ class Sampler(Elaboratable):
 		if platform:
 			chan_enable.reset = ~0
 
-		# -------------------------------------
-		# Combinational Logic
-
-		for i in range(self.num_channels):
-			m.d.comb += channels[i].i.eq(self.i.chan_inputs)
-
-			with m.If(self.i.chan_select == i):
-				m.d.comb += channels[i].we.eq(self.i.chan_we)
+			for i, ch in enumerate(channels):
+				ch.rate.reset   = CHANNEL_INIT_VALUES[i]['rate']
+				ch.length.reset = CHANNEL_INIT_VALUES[i]['length']
+				ch.start.reset  = CHANNEL_INIT_VALUES[i]['start']
+				ch.vol.reset    = CHANNEL_INIT_VALUES[i]['vol']
 
 		# -------------------------------------
 		# Sequential Logic
 
-		m.d.sync += cycle_counter.eq(cycle_counter + 1)
-
-		with m.If(self.i.chan_we.phase):
-			m.d.sync += phase_reset.eq(phase_reset | i << self.i.chan_select)
-
+		# Sampler state
 		with m.If(self.i.chan_enable_we):
 			m.d.sync += chan_enable.eq(self.i.chan_enable)
 
+		# Channel state
+		for i, ch in enumerate(channels):
+			with m.If(self.i.chan_select == i):
+				with m.If(self.i.chan_we.rate):
+					m.d.sync += ch.rate.eq(self.i.chan_i.rate)
+				with m.If(self.i.chan_we.phase):
+					m.d.sync += phase_reset.eq(phase_reset | 1 << i)
+				with m.If(self.i.chan_we.sample):
+					m.d.sync += ch.start.eq(self.i.chan_i.start)
+					m.d.sync += ch.length.eq(self.i.chan_i.length),
+				with m.If(self.i.chan_we.vol):
+					m.d.sync += ch.vol.eq(self.i.chan_i.vol)
+
+		# Sequencing
+		m.d.sync += cycle_counter.eq(cycle_counter + 1)
+
 		with m.FSM(name='mix_fsm') as fsm:
 			with m.State('OUTPUT'):
-				# ASSUME: cycle_counter == 0
-				m.d.sync += [
-					self.o.eq(acc),
-					acc.eq(0),
-					phase_reset.eq(0),
-				]
-
+				m.d.sync += self.o.eq(acc)
+				m.d.sync += acc.eq(0)
+				m.d.sync += phase_reset.eq(0)
 				m.next = 'UPDATE0'
 
-			for i in range(self.num_channels):
+			for i, ch in enumerate(channels):
 				with m.State(f'UPDATE{i}'):
 					with m.If(chan_enable[i]):
 						with m.If(phase_reset[i]):
-							channels[i].reset_phase(m)
+							m.d.sync += ch.phase.eq(0)
 						with m.Else():
-							channels[i].update_phase(m)
+							m.d.sync += ch.phase.eq((ch.phase + ch.rate)[:PHASE_BITS])
+
 					m.next = f'ACCUM{i}'
 
-			for i in range(self.num_channels):
-				# ASSUME: cycle_counter == 1 .. num_channels
 				with m.State(f'ACCUM{i}'):
 					with m.If(chan_enable[i]):
-						m.d.comb += [
-							self.ram_addr.eq(channels[i].sample_addr),
-							volume_rom.addr.eq(Cat(self.i.ram_data, channels[i].sample_vol)),
-						]
+						offs = ch.phase[-SAMPLE_ADDR_BITS:] & ch.length
+						m.d.comb += self.ram_addr.eq(offs + ch.start)
+						m.d.comb += volume_rom.addr.eq(Cat(self.i.ram_data, ch.vol))
+						m.d.sync += acc.eq(acc + volume_rom.rdat)
 
-						m.d.sync += [
-							acc.eq(acc + volume_rom.rdat)
-						]
-
-					if i == self.num_channels - 1:
-						m.next = 'WAIT'
-					else:
-						m.next = f'UPDATE{i+1}'
+					m.next = 'WAIT' if i == self.num_channels - 1 else f'UPDATE{i+1}'
 
 			with m.State('WAIT'):
-				# ASSUME: cycle_counter == num_channels + 1 .. sample_cycs - 1
-
 				with m.If(cycle_counter == self.sample_cycs - 1):
 					m.d.sync += cycle_counter.eq(0)
 					m.next = 'OUTPUT'

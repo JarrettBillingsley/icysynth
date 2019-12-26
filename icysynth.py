@@ -6,6 +6,7 @@ from nmigen.back import verilog
 from nmigen.back.pysim import *
 from nmigen.hdl.rec import *
 
+from constants import *
 from mixer import *
 from noise import *
 from pll import *
@@ -16,18 +17,6 @@ from serial_cmd import *
 from sim import *
 from term import connect_over_serial
 from uart import *
-
-# --------------------------------------------------------------------------------------------------
-# Constants
-# --------------------------------------------------------------------------------------------------
-
-# TODO: bodge (duplicated constants)
-NUM_CHANNELS  = 8
-CLK_RATE      = 16777216
-SAMPLE_RATE   = 16384
-SAMPLE_CYCS   = CLK_RATE // SAMPLE_RATE
-CLK_PERIOD    = 1 / CLK_RATE
-BAUDRATE      = 9600
 
 # --------------------------------------------------------------------------------------------------
 # The synth as a single module

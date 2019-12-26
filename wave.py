@@ -1,10 +1,8 @@
 from nmigen import *
 from nmigen.build import Platform
 
+from constants import *
 from signals import *
-
-# TODO: bodge
-from sim import *
 
 # --------------------------------------------------------------------------------------------------
 # Wave Channel

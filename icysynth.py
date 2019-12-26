@@ -18,6 +18,10 @@ from sim import *
 from term import connect_over_serial
 from uart import *
 
+# IDEAS:
+# - stereo (maybe simple like genesis/GB)
+# - echo (using a RAM?)
+
 # --------------------------------------------------------------------------------------------------
 # The synth as a single module
 # --------------------------------------------------------------------------------------------------
@@ -103,6 +107,31 @@ class IcySynth(Elaboratable):
 # main
 # --------------------------------------------------------------------------------------------------
 
+def generate(top):
+	from nmigen_boards.icestick import ICEStickPlatform
+
+	platform = ICEStickPlatform()
+
+	platform.add_resources([
+		Resource('sound_out', 0,
+			Subsignal('pin', Pins('3', conn=('j', 1), dir='o')),
+		)
+	])
+
+	platform.build(top, do_program = args.program or args.interactive)
+
+def interactive():
+	connect_over_serial('ftdi://ftdi:2232/2', baudrate = BAUDRATE)
+
+def view():
+	import subprocess
+
+	subprocess.run(['nextpnr-ice40',
+		'--pcf', 'build/top.pcf',
+		'--json', 'build/top.json',
+		'--gui', '--gui-no-aa'
+	])
+
 def parse_args():
 	parser = ArgumentParser()
 	p_action = parser.add_subparsers(dest = 'action')
@@ -123,38 +152,16 @@ def parse_args():
 
 	return parser.parse_args()
 
-def interactive():
-	connect_over_serial('ftdi://ftdi:2232/2', baudrate = BAUDRATE)
-
-def view():
-	import subprocess
-
-	subprocess.run(['nextpnr-ice40',
-		'--pcf', 'build/top.pcf',
-		'--json', 'build/top.json',
-		'--gui', '--gui-no-aa'
-	])
-
 if __name__ == '__main__':
-	top = Module()
-	dut = IcySynth(NUM_CHANNELS, SAMPLE_CYCS, BAUDRATE)
-	top.submodules.synth = dut
 	args = parse_args()
 
+	top = Module()
+	top.submodules.synth = synth = IcySynth(NUM_CHANNELS, SAMPLE_CYCS, BAUDRATE)
+
 	if args.action == 'simulate':
-		simulate(top, dut)
+		simulate(top, synth)
 	elif args.action == 'generate':
-		from nmigen_boards.icestick import *
-
-		platform = ICEStickPlatform()
-
-		platform.add_resources([
-			Resource('sound_out', 0,
-				Subsignal('pin', Pins('3', conn=('j', 1), dir='o')),
-			)
-		])
-
-		platform.build(top, do_program = args.program or args.interactive)
+		generate(top)
 
 		if args.interactive:
 			interactive()

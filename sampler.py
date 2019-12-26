@@ -1,7 +1,6 @@
 from nmigen import *
 from nmigen.build import Platform
 
-from wave import *
 from rom import *
 from signals import *
 

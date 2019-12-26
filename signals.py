@@ -9,26 +9,6 @@ from constants import *
 # Layouts
 # --------------------------------------------------------------------------------------------------
 
-class MixerStateLayout(Layout):
-	def __init__(self, bits_over_8): super().__init__([
-			('mix_shift', bits_over_8),
-		])
-
-class MixerEnableLayout(Layout):
-	def __init__(self): super().__init__([
-			('mix_shift', 1),
-		])
-
-class SamplerInputLayout(Layout):
-	def __init__(self, num_channels): super().__init__([
-			('chan_enable',    num_channels       ),
-			('chan_enable_we', 1                  ),
-			('chan_select',    range(num_channels)),
-			('chan_i',         WaveStateLayout()  ),
-			('chan_we',        WaveEnableLayout() ),
-			('ram_data',       SAMPLE_BITS        ),
-		])
-
 class WaveStateLayout(Layout):
 	def __init__(self): super().__init__([
 			('phase',  PHASE_BITS),
@@ -58,6 +38,26 @@ class NoiseEnableLayout(Layout):
 			('vol',    1),
 		])
 
+class MixerStateLayout(Layout):
+	def __init__(self, bits_over_8): super().__init__([
+			('mix_shift', bits_over_8),
+		])
+
+class MixerEnableLayout(Layout):
+	def __init__(self): super().__init__([
+			('mix_shift', 1),
+		])
+
+class SamplerInputLayout(Layout):
+	def __init__(self, num_channels): super().__init__([
+			('chan_enable',    num_channels       ),
+			('chan_enable_we', 1                  ),
+			('chan_select',    range(num_channels)),
+			('chan_i',         WaveStateLayout()  ),
+			('chan_we',        WaveEnableLayout() ),
+			('ram_data',       SAMPLE_BITS        ),
+		])
+
 class CommandOutputLayout(Layout):
 	def __init__(self, num_channels, bits_over_8): super().__init__([
 			('sampler_i', SamplerInputLayout(num_channels)),
@@ -75,12 +75,12 @@ class CommandOutputLayout(Layout):
 # --------------------------------------------------------------------------------------------------
 
 class NoiseState(Record):
-	def __init__(self, name=None):    super().__init__(NoiseStateLayout(), name=name)
+	def __init__(self, name=None): super().__init__(NoiseStateLayout(), name=name)
 class NoiseEnable(Record):
 	def __init__(self): super().__init__(NoiseEnableLayout())
 
 class WaveState(Record):
-	def __init__(self, name=None):    super().__init__(WaveStateLayout(), name=name)
+	def __init__(self, name=None): super().__init__(WaveStateLayout(), name=name)
 class WaveEnable(Record):
 	def __init__(self): super().__init__(WaveEnableLayout())
 

@@ -7,9 +7,11 @@ from nmigen.back.pysim import *
 from nmigen.hdl.rec import *
 
 from mixer import *
+from noise import *
 from pll import *
 from pwm import *
 from ram import *
+from sampler import *
 from serial_cmd import *
 from sim import *
 from term import connect_over_serial
@@ -36,10 +38,12 @@ class IcySynth(Elaboratable):
 		self.num_channels = num_channels
 		self.baudrate = baudrate
 
-		self.o     = Signal()
-		self.mixer = Mixer(num_channels, sample_cycs)
-		self.pwm   = PWM()
-		self.ram   = SampleRam()
+		self.ram     = SampleRam()
+		self.sampler = Sampler(num_channels, sample_cycs)
+		self.noise   = NoiseChannel()
+		self.mixer   = Mixer(self.sampler.o, self.noise.o)
+		self.pwm     = PWM()
+		self.o       = Signal()
 		pass
 
 	def elaborate(self, platform: Platform) -> Module:
@@ -58,25 +62,35 @@ class IcySynth(Elaboratable):
 
 			uart_freq = int(pll.best_fout * 1_000_000)
 
-		m.submodules.mixer = self.mixer
-		m.submodules.pwm   = self.pwm
-		m.submodules.ram   = self.ram
+		self.cmd = UartCmd(self.num_channels, self.mixer.bits_over_8, self.baudrate, uart_freq)
 
-		self.cmd = UartCmd(self.num_channels, self.baudrate, uart_freq)
-		m.submodules.cmd   = self.cmd
+		m.submodules.cmd     = self.cmd
+		m.submodules.ram     = self.ram
+		m.submodules.sampler = self.sampler
+		m.submodules.noise   = self.noise
+		m.submodules.mixer   = self.mixer
+		m.submodules.pwm     = self.pwm
 
 		m.d.comb += [
+			# CMD -> Sampler
+			self.sampler.i.eq(self.cmd.o.sampler_i),
+
 			# CMD -> RAM
 			self.ram.waddr.eq(self.cmd.o.ram_waddr),
 			self.ram.wdata.eq(self.cmd.o.ram_wdata),
-			self.ram.we.eq(self.cmd.o.ram_we),
+			self.ram.we   .eq(self.cmd.o.ram_we),
+
+			# Sampler <-> RAM
+			self.ram.raddr.eq(self.sampler.sample_ram_addr),
+			self.sampler.sample_ram_data.eq(self.ram.rdata),
+
+			# CMD -> Noise
+			self.noise.i.eq(self.cmd.o.noise_i),
+			self.noise.we.eq(self.cmd.o.noise_we),
 
 			# CMD -> Mixer
-			self.mixer.i.eq(self.cmd.o),
-
-			# Mixer <-> RAM
-			self.ram.raddr.eq(self.mixer.sample_ram_addr),
-			self.mixer.sample_ram_data.eq(self.ram.rdata),
+			self.mixer.i.eq(self.cmd.o.mixer_i),
+			self.mixer.we.eq(self.cmd.o.mixer_we),
 
 			# Mixer -> PWM
 			self.pwm.i.eq(self.mixer.o[:8]),

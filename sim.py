@@ -32,30 +32,34 @@ CHANNEL_INIT_VALUES = [
 	{ 'rate': 0x012000, 'length': 0x3F, 'start': 0x40, 'vol': 0x0F }, # 7
 ]
 
-def setup_channel(mix, i, values):
-	yield mix.i.chan_select.eq(i)
-	yield mix.i.chan_inputs.rate.eq(values['rate'])
-	yield mix.i.chan_inputs.length.eq(values['length'])
-	yield mix.i.chan_inputs.start.eq(values['start'])
-	yield mix.i.chan_inputs.vol.eq(values['vol'])
-	yield from toggle_enable(mix.i.chan_we.rate, mix.i.chan_we.sample, mix.i.chan_we.vol)
+def setup_channel(samp, i, values):
+	yield samp.i.chan_select.eq(i)
+	yield samp.i.chan_inputs.rate.eq(values['rate'])
+	yield samp.i.chan_inputs.length.eq(values['length'])
+	yield samp.i.chan_inputs.start.eq(values['start'])
+	yield samp.i.chan_inputs.vol.eq(values['vol'])
+	yield from toggle_enable(samp.i.chan_we.rate, samp.i.chan_we.sample, samp.i.chan_we.vol)
 
 def delay(n):
     return [None] * n
 
-def test_proc(mix):
+def test_proc(synth):
+	mix = synth.mixer
+	samp = synth.sampler
+	noise = synth.noise
+
 	# setup channels
 	for i in range(NUM_CHANNELS):
-		yield from setup_channel(mix, i, CHANNEL_INIT_VALUES[i])
+		yield from setup_channel(samp, i, CHANNEL_INIT_VALUES[i])
 
-	yield mix.i.noise_inputs.vol.eq(3)
-	yield mix.i.noise_inputs.period.eq(50)
-	yield from toggle_enable(mix.i.noise_we.vol, mix.i.noise_we.period)
+	yield noise.i.vol.eq(3)
+	yield noise.i.period.eq(50)
+	yield from toggle_enable(noise.we.vol, noise.we.period)
 
 	# setup mixer state
-	yield mix.i.inputs.chan_enable.eq(0x0F)
-	yield mix.i.inputs.mix_shift.eq(0)
-	yield from toggle_enable(mix.i.we.chan_enable, mix.i.we.mix_shift)
+	yield samp.i.chan_enable.eq(0x0F)
+	yield mix.i.mix_shift.eq(3)
+	yield from toggle_enable(samp.i.chan_enable_we, mix.we.mix_shift)
 
 def serial_send(rx, divisor, data):
 	yield rx.eq(1)
@@ -76,7 +80,7 @@ def serial_send(rx, divisor, data):
 
 
 def test_proc2(cmd):
-	d = cmd.uart_rx.divisor
+	d = cmd.uart.divisor
 	yield from delay(2)
 	yield from serial_send(cmd.rx, d, ord('1'))
 	yield from serial_send(cmd.rx, d, ord('2'))
@@ -84,13 +88,13 @@ def test_proc2(cmd):
 
 SIM_CLOCKS = 5000
 
-def simulate(top, dut):
+def simulate(top, synth):
 	sim = Simulator(top)
 	sim.add_clock(CLK_PERIOD)
 
 	def fuckyou():
-		yield from test_proc(dut.mixer)
-		# yield from test_proc2(dut.cmd)
+		yield from test_proc(synth)
+		yield from test_proc2(synth.cmd)
 	sim.add_sync_process(fuckyou)
 
 	# BUG: nmigen currently ignores the 'traces' param on this function,

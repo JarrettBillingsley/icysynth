@@ -8,33 +8,14 @@ from signals import *
 # Serial UART Command interface
 # --------------------------------------------------------------------------------------------------
 
-# much of this code taken from nmigen-examples receive-uart.py
-
-class OneShot(Elaboratable):
-	def __init__(self, duration, name):
-		self.duration = duration
-		self.trg = Signal(name=name+"_trg")
-		self.out = Signal(name=name+"_out")
-
-	def elaborate(self, platform):
-		counter = Signal(range(self.duration + 1))
-		m = Module()
-		with m.If(self.trg):
-			m.d.sync += [
-				counter.eq(self.duration),
-				self.out.eq(True),
-			]
-		with m.Elif(counter == 0):
-			m.d.sync += self.out.eq(False)
-		with m.Else():
-			m.d.sync += counter.eq(counter - 1)
-		return m
+# much of this code taken from nmigen-examples/receive-uart.py
 
 class UartCmd(Elaboratable):
-	def __init__(self, num_channels, baudrate, clk_freq):
+	def __init__(self, num_channels, bits_over_8, baudrate, clk_freq):
 		self.num_channels = num_channels
-		self.baudrate = baudrate
-		self.clk_freq = clk_freq
+		self.baudrate     = baudrate
+		self.clk_freq     = clk_freq
+		self.divisor      = int(self.clk_freq // self.baudrate)
 
 		# -------------------------------------
 		# Inputs
@@ -44,29 +25,37 @@ class UartCmd(Elaboratable):
 		# -------------------------------------
 		# Outputs
 
-		self.o             = CommandOutput(num_channels)
+		self.o = CommandOutput(num_channels, bits_over_8)
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
 
-		uart_divisor    = int(self.clk_freq // self.baudrate)
-		status_duration = int(0.1 * self.clk_freq)
+		# -------------------------------------
+		# Submodules
 
-		uart_rx         = UARTRx(divisor = uart_divisor)
+		self.uart = UARTRx(divisor = self.divisor)
+		m.submodules.uart = self.uart
 
-		self.uart_rx = uart_rx
-		m.submodules.uart_rx     = uart_rx
-
-		m.d.comb += uart_rx.rx_pin.eq(self.rx)
+		# -------------------------------------
+		# Internal State
 
 		chan_enable = Signal(self.num_channels, reset = (1 << self.num_channels) - 1)
 
-		m.d.comb += self.o.mixer_i.inputs.chan_enable.eq(chan_enable)
+		# -------------------------------------
+		# Combinational Logic
+
+		m.d.comb += [
+			self.uart.rx_pin.eq(self.rx),
+			self.o.sampler_i.chan_enable.eq(chan_enable),
+		]
+
+		# -------------------------------------
+		# Sequential Logic
 
 		ZERO = ord('0')
 		ONE = ord('1')
-		ready = uart_rx.rx_rdy
-		data = uart_rx.rx_data
+		ready = self.uart.rx_rdy
+		data = self.uart.rx_data
 
 		with m.FSM(name = 'cmd_fsm') as fsm:
 			with m.State('IDLE'):
@@ -74,14 +63,14 @@ class UartCmd(Elaboratable):
 					with m.If((data > ZERO) & (data <= (ZERO + self.num_channels))):
 						m.d.sync += [
 							chan_enable.eq(chan_enable ^ (1 << (data - ONE))),
-							self.o.mixer_i.we.chan_enable.eq(1)
+							self.o.sampler_i.chan_enable_we.eq(1)
 						]
 
 						m.next = 'TICKLE'
 
 			with m.State('TICKLE'):
 				m.d.sync += [
-					self.o.mixer_i.we.chan_enable.eq(0),
+					self.o.sampler_i.chan_enable_we.eq(0),
 				]
 
 				m.next = 'IDLE'

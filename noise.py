@@ -12,15 +12,13 @@ class NoiseChannel(Elaboratable):
 		# -------------------------------------
 		# Inputs
 
-		self.inputs      = NoiseState()
-		self.we          = NoiseEnable()
-
-		# TODO: BZZ mode
+		self.i  = NoiseState()
+		self.we = NoiseEnable()
 
 		# -------------------------------------
 		# Outputs
 
-		self.sound_out = Signal(8)
+		self.o = Signal(8)
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
@@ -30,7 +28,7 @@ class NoiseChannel(Elaboratable):
 
 		state   = NoiseState()
 		lfsr    = Signal(15)
-		counter = Signal(16)
+		counter = Signal(16) # TODO: does this counter really need to be 16b?
 
 		lfsr.reset = 1
 
@@ -41,7 +39,7 @@ class NoiseChannel(Elaboratable):
 		# -------------------------------------
 		# Combinational Logic
 
-		m.d.comb += self.sound_out.eq(Mux(lfsr[0], Repl(state.vol, 2), 0))
+		m.d.comb += self.o.eq(Mux(lfsr[0], Repl(state.vol, 2), 0))
 
 		# -------------------------------------
 		# Sequential Logic
@@ -58,8 +56,8 @@ class NoiseChannel(Elaboratable):
 
 		# Writing to state
 		with m.If(self.we.period):
-			m.d.sync += state.period.eq(self.inputs.period)
+			m.d.sync += state.period.eq(self.i.period)
 		with m.If(self.we.vol):
-			m.d.sync += state.vol.eq(self.inputs.vol)
+			m.d.sync += state.vol.eq(self.i.vol)
 
 		return m

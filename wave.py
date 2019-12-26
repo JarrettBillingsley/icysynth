@@ -19,7 +19,6 @@ class WaveChannel(Elaboratable):
 
 		self.inputs      = WaveState()
 		self.we          = WaveEnable()
-		self.enabled     = Signal()
 
 		# -------------------------------------
 		# Outputs

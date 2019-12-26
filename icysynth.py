@@ -105,52 +105,64 @@ class IcySynth(Elaboratable):
 
 def parse_args():
 	parser = ArgumentParser()
-	p_action = parser.add_subparsers(dest="action")
-	p_action.add_parser("simulate")
-	p_action.add_parser("generate")
-	p_program = p_action.add_parser("program")
-	p_program.add_argument('-i', '--interactive',
+	p_action = parser.add_subparsers(dest = 'action')
+	p_action.add_parser('simulate')
+	p_action.add_parser('connect')
+	p_action.add_parser('view')
+
+	p_generate = p_action.add_parser('generate')
+	p_generate.add_argument('-p', '--program',
+		help = 'program the device after generating',
+		action = 'store_true')
+	p_generate.add_argument('-i', '--interactive',
 		help = 'connect over UART after programming',
 		action = 'store_true')
-	p_program.add_argument('-d', '--dry-run',
-		help = 'build, but don\'t program',
+	p_generate.add_argument('-v', '--view',
+		help = 'view in nextpnr after generating',
 		action = 'store_true')
-	p_action.add_parser("connect")
 
 	return parser.parse_args()
 
 def interactive():
 	connect_over_serial('ftdi://ftdi:2232/2', baudrate = BAUDRATE)
 
-if __name__ == "__main__":
+def view():
+	import subprocess
+
+	subprocess.run(['nextpnr-ice40',
+		'--pcf', 'build/top.pcf',
+		'--json', 'build/top.json',
+		'--gui', '--gui-no-aa'
+	])
+
+if __name__ == '__main__':
 	top = Module()
 	dut = IcySynth(NUM_CHANNELS, SAMPLE_CYCS, BAUDRATE)
 	top.submodules.synth = dut
 	args = parse_args()
 
-	if args.action == "simulate":
+	if args.action == 'simulate':
 		simulate(top, dut)
-	elif args.action == "generate":
-		v = verilog.convert(top, name = "top")
-
-		with open('icysynth.v', 'w') as f:
-			print(v, file=f)
-	elif args.action == "program":
+	elif args.action == 'generate':
 		from nmigen_boards.icestick import *
 
 		platform = ICEStickPlatform()
 
 		platform.add_resources([
-			Resource("sound_out", 0,
-				Subsignal("pin", Pins('3', conn=('j', 1), dir='o')),
+			Resource('sound_out', 0,
+				Subsignal('pin', Pins('3', conn=('j', 1), dir='o')),
 			)
 		])
 
-		platform.build(top, do_program = not args.dry_run)
+		platform.build(top, do_program = args.program or args.interactive)
 
 		if args.interactive:
 			interactive()
-	elif args.action == "connect":
+		elif args.view:
+			view()
+	elif args.action == 'connect':
 		interactive()
+	elif args.action == 'view':
+		view()
 	else:
-		print("wat?")
+		print('wat?')

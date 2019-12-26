@@ -26,6 +26,7 @@ class SamplerInputLayout(Layout):
 			('chan_select',    range(num_channels)),
 			('chan_inputs',    WaveStateLayout()  ),
 			('chan_we',        WaveEnableLayout() ),
+			('ram_data',       SAMPLE_BITS        ),
 		])
 
 class WaveStateLayout(Layout):

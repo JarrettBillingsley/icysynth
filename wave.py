@@ -15,8 +15,8 @@ class WaveChannel(Elaboratable):
 		# -------------------------------------
 		# Inputs
 
-		self.inputs      = WaveState()
-		self.we          = WaveEnable()
+		self.i  = WaveState()
+		self.we = WaveEnable()
 
 		# -------------------------------------
 		# Outputs
@@ -55,14 +55,14 @@ class WaveChannel(Elaboratable):
 		# Sequential Logic
 
 		with m.If(self.we.rate):
-			m.d.sync += state.rate.eq(self.inputs.rate)
+			m.d.sync += state.rate.eq(self.i.rate)
 		with m.If(self.we.sample):
 			m.d.sync += [
-				state.start.eq(self.inputs.start),
-				state.length.eq(self.inputs.length),
+				state.start.eq(self.i.start),
+				state.length.eq(self.i.length),
 			]
 		with m.If(self.we.vol):
-			m.d.sync += state.vol.eq(self.inputs.vol)
+			m.d.sync += state.vol.eq(self.i.vol)
 
 		return m
 

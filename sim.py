@@ -27,7 +27,7 @@ def setup_channel(samp, i, values):
 def delay(n):
     return [None] * n
 
-def test_proc(synth):
+def test_setup_synth(synth):
 	mix = synth.mixer
 	samp = synth.sampler
 	noise = synth.noise
@@ -62,24 +62,21 @@ def serial_send(rx, divisor, data):
 	yield rx.eq(1)
 	yield from delay(divisor + 2)
 
-
-def test_proc2(cmd):
+def test_serial(cmd):
 	d = cmd.uart.divisor
 	yield from delay(2)
 	yield from serial_send(cmd.rx, d, ord('1'))
 	yield from serial_send(cmd.rx, d, ord('2'))
 	yield from serial_send(cmd.rx, d, ord('3'))
 
-SIM_CLOCKS = 5000
-
 def simulate(top, synth):
 	sim = Simulator(top)
 	sim.add_clock(CLK_PERIOD)
 
-	def fuckyou():
-		yield from test_proc(synth)
-		yield from test_proc2(synth.cmd)
-	sim.add_sync_process(fuckyou)
+	def shim():
+		yield from test_setup_synth(synth)
+		# yield from test_serial(synth.cmd)
+	sim.add_sync_process(shim)
 
 	# BUG: nmigen currently ignores the 'traces' param on this function,
 	# so the resulting gtkw isn't very useful.

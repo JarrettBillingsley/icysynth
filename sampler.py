@@ -21,13 +21,12 @@ class Sampler(Elaboratable):
 		# Inputs
 
 		self.i = SamplerInput(num_channels)
-		self.sample_ram_data = Signal(SAMPLE_BITS)
 
 		# -------------------------------------
 		# Outputs
 
-		self.o = Signal(range(self.acc_range))
-		self.sample_ram_addr  = Signal(SAMPLE_ADDR_BITS)
+		self.o        = Signal(range(self.acc_range))
+		self.ram_addr = Signal(SAMPLE_ADDR_BITS)
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
@@ -58,7 +57,7 @@ class Sampler(Elaboratable):
 		# Combinational Logic
 
 		for i in range(self.num_channels):
-			m.d.comb += channels[i].inputs.eq(self.i.chan_inputs)
+			m.d.comb += channels[i].i.eq(self.i.chan_inputs)
 
 			with m.If(self.i.chan_select == i):
 				m.d.comb += channels[i].we.eq(self.i.chan_we)
@@ -99,8 +98,8 @@ class Sampler(Elaboratable):
 				with m.State(f'ACCUM{i}'):
 					with m.If(chan_enable[i]):
 						m.d.comb += [
-							self.sample_ram_addr.eq(channels[i].sample_addr),
-							volume_rom.addr.eq(Cat(self.sample_ram_data, channels[i].sample_vol)),
+							self.ram_addr.eq(channels[i].sample_addr),
+							volume_rom.addr.eq(Cat(self.i.ram_data, channels[i].sample_vol)),
 						]
 
 						m.d.sync += [

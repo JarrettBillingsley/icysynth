@@ -21,13 +21,13 @@ class Sampler(Elaboratable):
 		# Inputs
 
 		self.i = SamplerInput(num_channels)
-		self.sample_ram_data = Signal(4)
+		self.sample_ram_data = Signal(SAMPLE_BITS)
 
 		# -------------------------------------
 		# Outputs
 
 		self.o = Signal(range(self.acc_range))
-		self.sample_ram_addr  = Signal(9)
+		self.sample_ram_addr  = Signal(SAMPLE_ADDR_BITS)
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()

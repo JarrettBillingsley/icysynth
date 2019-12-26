@@ -21,8 +21,8 @@ class WaveChannel(Elaboratable):
 		# -------------------------------------
 		# Outputs
 
-		self.sample_addr = Signal(9)
-		self.sample_vol  = Signal(4)
+		self.sample_addr = Signal(SAMPLE_ADDR_BITS)
+		self.sample_vol  = Signal(VOL_BITS)
 
 		# -------------------------------------
 		# Juicy Internals
@@ -47,7 +47,7 @@ class WaveChannel(Elaboratable):
 		# Combinational Logic
 
 		m.d.comb += [
-			self.sample_addr.eq((state.phase[-9:] & state.length) + state.start),
+			self.sample_addr.eq((state.phase[-SAMPLE_ADDR_BITS:] & state.length) + state.start),
 			self.sample_vol.eq(state.vol),
 		]
 
@@ -68,7 +68,7 @@ class WaveChannel(Elaboratable):
 
 	def update_phase(self, m: Module):
 		s = self.internal_state
-		m.d.sync += s.phase.eq((s.phase + s.rate)[:24])
+		m.d.sync += s.phase.eq((s.phase + s.rate)[:PHASE_BITS])
 
 	def reset_phase(self, m: Module):
 		m.d.sync += self.internal_state.phase.eq(0)

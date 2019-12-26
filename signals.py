@@ -1,6 +1,8 @@
 from nmigen import *
 from nmigen.hdl.rec import *
 
+from constants import *
+
 # ALL THIS BOILERPLAAAAAATE AAAAAAAAAAGHHHHHHHHHHGHHGHH
 
 # --------------------------------------------------------------------------------------------------
@@ -28,11 +30,11 @@ class SamplerInputLayout(Layout):
 
 class WaveStateLayout(Layout):
 	def __init__(self): super().__init__([
-			('phase',  24),
-			('rate',   24),
-			('start',  9),
-			('length', 9),
-			('vol',    4),
+			('phase',  PHASE_BITS),
+			('rate',   PHASE_BITS),
+			('start',  SAMPLE_ADDR_BITS),
+			('length', SAMPLE_ADDR_BITS),
+			('vol',    VOL_BITS),
 		])
 
 class WaveEnableLayout(Layout):
@@ -46,7 +48,7 @@ class WaveEnableLayout(Layout):
 class NoiseStateLayout(Layout):
 	def __init__(self): super().__init__([
 			('period', 16),
-			('vol',    4),
+			('vol',    VOL_BITS),
 		])
 
 class NoiseEnableLayout(Layout):
@@ -62,8 +64,8 @@ class CommandOutputLayout(Layout):
 			('noise_we',  NoiseEnableLayout()),
 			('mixer_i',   MixerStateLayout(bits_over_8)),
 			('mixer_we',  MixerEnableLayout()),
-			('ram_waddr', 9),
-			('ram_wdata', 4),
+			('ram_waddr', SAMPLE_ADDR_BITS),
+			('ram_wdata', SAMPLE_BITS),
 			('ram_we',    1),
 		])
 

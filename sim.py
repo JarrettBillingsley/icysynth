@@ -37,7 +37,7 @@ def test_setup_synth(synth):
 		yield from setup_channel(samp, i, CHANNEL_INIT_VALUES[i])
 
 	yield noise.i.vol.eq(3)
-	yield noise.i.period.eq(50)
+	yield noise.i.period.eq(1)
 	yield from toggle_enable(noise.we.vol, noise.we.period)
 
 	# setup mixer state
@@ -75,7 +75,7 @@ def simulate(top, synth):
 
 	def shim():
 		yield from test_setup_synth(synth)
-		yield from test_serial(synth.cmd)
+		# yield from test_serial(synth.cmd)
 	sim.add_sync_process(shim)
 
 	# BUG: nmigen currently ignores the 'traces' param on this function,

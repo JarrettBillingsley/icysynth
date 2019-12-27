@@ -39,6 +39,7 @@ class UartCmd(Elaboratable):
 		# -------------------------------------
 		# Internal State
 
+		# This stuff is just temporary.
 		chan_enable = Signal(self.num_channels, reset = ~0)
 		noise_period = Signal(8)
 		noise_period.reset = 1
@@ -57,15 +58,13 @@ class UartCmd(Elaboratable):
 		# -------------------------------------
 		# Sequential Logic
 
-		ZERO = ord('0')
-		ONE = ord('1')
 		ready = self.uart.rx_rdy
 		data = self.uart.rx_data
 
 		with m.If(ready):
 			with m.Switch(data):
 				for i in range(self.num_channels):
-					with m.Case(ZERO + i + 1):
+					with m.Case(ord('1') + i):
 						m.d.sync += chan_enable.eq(chan_enable ^ 1 << i)
 						m.d.sync += self.o.sampler_i.chan_enable_we.eq(1)
 				with m.Case(ord('a')):

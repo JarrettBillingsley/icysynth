@@ -32,7 +32,7 @@ class NoiseChannel(Elaboratable):
 
 		lfsr.reset = 1
 
-		if platform:
+		if TESTING:
 			state.period.reset = 1
 			state.vol.reset    = 0xF
 

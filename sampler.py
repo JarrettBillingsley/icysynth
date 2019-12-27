@@ -44,7 +44,7 @@ class Sampler(Elaboratable):
 		chan_enable   = Signal(self.num_channels)
 		phase_reset   = Signal(self.num_channels)
 
-		if platform:
+		if TESTING:
 			chan_enable.reset = ~0
 
 			for i, ch in enumerate(channels):

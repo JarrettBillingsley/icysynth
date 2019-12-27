@@ -75,7 +75,7 @@ def simulate(top, synth):
 
 	def shim():
 		yield from test_setup_synth(synth)
-		# yield from test_serial(synth.cmd)
+		yield from test_serial(synth.cmd)
 	sim.add_sync_process(shim)
 
 	# BUG: nmigen currently ignores the 'traces' param on this function,

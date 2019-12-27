@@ -40,6 +40,8 @@ class UartCmd(Elaboratable):
 		# Internal State
 
 		chan_enable = Signal(self.num_channels, reset = ~0)
+		noise_period = Signal(16)
+		noise_period.reset = 50
 
 		# -------------------------------------
 		# Combinational Logic
@@ -47,6 +49,7 @@ class UartCmd(Elaboratable):
 		m.d.comb += [
 			self.uart.rx_pin.eq(self.rx),
 			self.o.sampler_i.chan_enable.eq(chan_enable),
+			self.o.noise_i.period.eq(noise_period),
 		]
 
 		# -------------------------------------
@@ -57,23 +60,32 @@ class UartCmd(Elaboratable):
 		ready = self.uart.rx_rdy
 		data = self.uart.rx_data
 
-		with m.FSM(name = 'cmd_fsm') as fsm:
-			with m.State('IDLE'):
-				with m.If(ready):
-					with m.If((data > ZERO) & (data <= (ZERO + self.num_channels))):
-						w = Signal(range(self.num_channels)).shape().width
-						m.d.sync += [
-							chan_enable.eq(chan_enable ^ (1 << (data - ONE)[:w])),
-							self.o.sampler_i.chan_enable_we.eq(1)
-						]
-
-						m.next = 'TICKLE'
-
-			with m.State('TICKLE'):
+		with m.If(ready):
+			with m.If((data > ZERO) & (data <= (ZERO + self.num_channels))):
+				w = Signal(range(self.num_channels)).shape().width
 				m.d.sync += [
-					self.o.sampler_i.chan_enable_we.eq(0),
+					chan_enable.eq(chan_enable ^ (1 << (data - ONE)[:w])),
+					self.o.sampler_i.chan_enable_we.eq(1),
 				]
-
-				m.next = 'IDLE'
+			with m.If(data == ord('a')):
+				m.d.sync += [
+					noise_period.eq(Cat(noise_period[:8], (noise_period[-8:] + 1)[:8])),
+					self.o.noise_we.period.eq(1),
+				]
+			with m.If(data == ord('z')):
+				m.d.sync += [
+					noise_period.eq(Cat(noise_period[:8], (noise_period[-8:] - 1)[:8])),
+					self.o.noise_we.period.eq(1),
+				]
+			with m.If(data == ord('s')):
+				m.d.sync += [
+					noise_period.eq(Cat((noise_period[:8] + 1)[:8], noise_period[-8:])),
+					self.o.noise_we.period.eq(1),
+				]
+			with m.If(data == ord('x')):
+				m.d.sync += [
+					noise_period.eq(Cat((noise_period[:8] - 1)[:8], noise_period[-8:])),
+					self.o.noise_we.period.eq(1),
+				]
 
 		return m

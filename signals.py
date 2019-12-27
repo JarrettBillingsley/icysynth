@@ -28,13 +28,15 @@ class WaveEnableLayout(Layout):
 
 class NoiseStateLayout(Layout):
 	def __init__(self): super().__init__([
-			('period', 16),
+			('period', 8),
+			('mode',   1),
 			('vol',    VOL_BITS),
 		])
 
 class NoiseEnableLayout(Layout):
 	def __init__(self): super().__init__([
 			('period', 1),
+			('mode',   1),
 			('vol',    1),
 		])
 

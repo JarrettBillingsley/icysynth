@@ -40,8 +40,9 @@ class UartCmd(Elaboratable):
 		# Internal State
 
 		chan_enable = Signal(self.num_channels, reset = ~0)
-		noise_period = Signal(16)
-		noise_period.reset = 50
+		noise_period = Signal(8)
+		noise_period.reset = 1
+		noise_mode = Signal(1)
 
 		# -------------------------------------
 		# Combinational Logic
@@ -50,6 +51,7 @@ class UartCmd(Elaboratable):
 			self.uart.rx_pin.eq(self.rx),
 			self.o.sampler_i.chan_enable.eq(chan_enable),
 			self.o.noise_i.period.eq(noise_period),
+			self.o.noise_i.mode.eq(noise_mode),
 		]
 
 		# -------------------------------------
@@ -61,31 +63,20 @@ class UartCmd(Elaboratable):
 		data = self.uart.rx_data
 
 		with m.If(ready):
-			with m.If((data > ZERO) & (data <= (ZERO + self.num_channels))):
-				w = Signal(range(self.num_channels)).shape().width
-				m.d.sync += [
-					chan_enable.eq(chan_enable ^ (1 << (data - ONE)[:w])),
-					self.o.sampler_i.chan_enable_we.eq(1),
-				]
-			with m.If(data == ord('a')):
-				m.d.sync += [
-					noise_period.eq(Cat(noise_period[:8], (noise_period[-8:] + 1)[:8])),
-					self.o.noise_we.period.eq(1),
-				]
-			with m.If(data == ord('z')):
-				m.d.sync += [
-					noise_period.eq(Cat(noise_period[:8], (noise_period[-8:] - 1)[:8])),
-					self.o.noise_we.period.eq(1),
-				]
-			with m.If(data == ord('s')):
-				m.d.sync += [
-					noise_period.eq(Cat((noise_period[:8] + 1)[:8], noise_period[-8:])),
-					self.o.noise_we.period.eq(1),
-				]
-			with m.If(data == ord('x')):
-				m.d.sync += [
-					noise_period.eq(Cat((noise_period[:8] - 1)[:8], noise_period[-8:])),
-					self.o.noise_we.period.eq(1),
-				]
+			with m.Switch(data):
+				for i in range(self.num_channels):
+					with m.Case(ZERO + i + 1):
+						m.d.sync += chan_enable.eq(chan_enable ^ 1 << i)
+						m.d.sync += self.o.sampler_i.chan_enable_we.eq(1)
+				with m.Case(ord('a')):
+					m.d.sync += noise_period.eq(noise_period + 1)
+					m.d.sync += self.o.noise_we.period.eq(1)
+				with m.Case(ord('z')):
+					m.d.sync += noise_period.eq(noise_period - 1)
+					m.d.sync += self.o.noise_we.period.eq(1)
+				with m.Case(ord('w')):
+					m.d.sync += noise_mode.eq(~noise_mode)
+					m.d.sync += self.o.noise_we.mode.eq(1)
+
 
 		return m

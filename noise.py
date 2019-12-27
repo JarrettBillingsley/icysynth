@@ -28,12 +28,12 @@ class NoiseChannel(Elaboratable):
 
 		state   = NoiseState()
 		lfsr    = Signal(15)
-		counter = Signal(16) # TODO: does this counter really need to be 16b?
+		counter = Signal(16)
 
 		lfsr.reset = 1
 
 		if platform:
-			state.period.reset = 50
+			state.period.reset = 1
 			state.vol.reset    = 0xF
 
 		# -------------------------------------
@@ -47,9 +47,11 @@ class NoiseChannel(Elaboratable):
 		# Processing
 		with m.If(counter == 0):
 			m.d.sync += [
-				counter.eq(state.period),
-				lfsr.eq(Cat(lfsr[1:15], lfsr[0] ^ lfsr[1])),
-				# TODO: BZZ mode (feedback is 0 ^ 6)
+				counter.eq(state.period << 8),
+				lfsr.eq(Mux(
+					state.mode,
+					Cat(lfsr[1:15], lfsr[0] ^ lfsr[6]),
+					Cat(lfsr[1:15], lfsr[0] ^ lfsr[1]))),
 			]
 		with m.Else():
 			m.d.sync += counter.eq(counter - 1)
@@ -57,6 +59,8 @@ class NoiseChannel(Elaboratable):
 		# Writing to state
 		with m.If(self.we.period):
 			m.d.sync += state.period.eq(self.i.period)
+		with m.If(self.we.mode):
+			m.d.sync += state.mode.eq(self.i.mode)
 		with m.If(self.we.vol):
 			m.d.sync += state.vol.eq(self.i.vol)
 

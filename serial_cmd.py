@@ -39,7 +39,7 @@ class UartCmd(Elaboratable):
 		# -------------------------------------
 		# Internal State
 
-		chan_enable = Signal(self.num_channels, reset = (1 << self.num_channels) - 1)
+		chan_enable = Signal(self.num_channels, reset = ~0)
 
 		# -------------------------------------
 		# Combinational Logic
@@ -61,8 +61,9 @@ class UartCmd(Elaboratable):
 			with m.State('IDLE'):
 				with m.If(ready):
 					with m.If((data > ZERO) & (data <= (ZERO + self.num_channels))):
+						w = Signal(range(self.num_channels)).shape().width
 						m.d.sync += [
-							chan_enable.eq(chan_enable ^ (1 << (data - ONE))),
+							chan_enable.eq(chan_enable ^ (1 << (data - ONE)[:w])),
 							self.o.sampler_i.chan_enable_we.eq(1)
 						]
 

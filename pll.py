@@ -95,7 +95,8 @@ class PLL(Elaboratable):
         rs = ResetSynchronizer(~pll_lock, domain=self.domain_name)
 
         m = Module()
-        m.submodules += [pll, rs]
+        m.submodules.pll_inst = pll
+        m.submodules.rs = rs
         return m
 
 

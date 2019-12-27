@@ -29,8 +29,13 @@ class SampleRam(Elaboratable):
 		# -------------------------------------
 		# Submodules
 
-		mem = Memory(width = SAMPLE_BITS, depth = (1 << SAMPLE_ADDR_BITS), init = DUMMY_RAM)
-		m.submodules.rdport = rdport = mem.read_port(domain = 'comb')
+		mem = Memory(
+			width = SAMPLE_BITS,
+			depth = (1 << SAMPLE_ADDR_BITS),
+			init = DUMMY_RAM,
+			name = 'sample_ram'
+		)
+		m.submodules.rdport = rdport = mem.read_port()
 		m.submodules.wrport = wrport = mem.write_port()
 
 		# -------------------------------------

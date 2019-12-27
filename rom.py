@@ -43,8 +43,8 @@ class VolumeRom(Elaboratable):
 		# -------------------------------------
 		# Submodules
 
-		mem = Memory(width = 8, depth = 256, init = make_voltab())
-		m.submodules.rdport = rdport = mem.read_port(domain = 'comb')
+		mem = Memory(width = 8, depth = 256, init = make_voltab(), name = 'volume_rom')
+		m.submodules.rdport = rdport = mem.read_port()
 
 		# -------------------------------------
 		# Combinational Logic

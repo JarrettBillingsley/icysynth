@@ -91,13 +91,19 @@ class Sampler(Elaboratable):
 						with m.Else():
 							m.d.sync += ch.phase.eq((ch.phase + ch.rate)[:PHASE_BITS])
 
+					m.next = f'SAMP_FETCH{i}'
+
+				with m.State(f'SAMP_FETCH{i}'):
+					offs = ch.phase[-SAMPLE_ADDR_BITS:] & ch.length
+					m.d.comb += self.ram_addr.eq(offs + ch.start)
+					m.next = f'VOL_FETCH{i}'
+
+				with m.State(f'VOL_FETCH{i}'):
+					m.d.comb += volume_rom.addr.eq(Cat(self.i.ram_data, ch.vol))
 					m.next = f'ACCUM{i}'
 
 				with m.State(f'ACCUM{i}'):
 					with m.If(chan_enable[i]):
-						offs = ch.phase[-SAMPLE_ADDR_BITS:] & ch.length
-						m.d.comb += self.ram_addr.eq(offs + ch.start)
-						m.d.comb += volume_rom.addr.eq(Cat(self.i.ram_data, ch.vol))
 						m.d.sync += acc.eq(acc + volume_rom.rdat)
 
 					m.next = 'WAIT' if i == self.num_channels - 1 else f'UPDATE{i+1}'

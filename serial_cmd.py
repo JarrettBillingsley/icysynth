@@ -33,17 +33,16 @@ class UartCmd(Elaboratable):
 		# -------------------------------------
 		# Submodules
 
-		self.uart = UARTRx(divisor = self.divisor)
-		m.submodules.uart = self.uart
+		m.submodules.uart = self.uart = UARTRx(divisor = self.divisor)
 
 		# -------------------------------------
 		# Internal State
 
 		# This stuff is just temporary.
-		chan_enable = Signal(self.num_channels, reset = ~0)
-		noise_period = Signal(8)
-		noise_period.reset = 1
-		noise_mode = Signal(1)
+		chan_enable  = Signal(self.num_channels, reset = ~0)
+		noise_period = Signal(8, reset = 1)
+		noise_mode   = Signal(1)
+		noise_on     = Signal(1, reset = 1)
 
 		# -------------------------------------
 		# Combinational Logic
@@ -53,6 +52,7 @@ class UartCmd(Elaboratable):
 			self.o.sampler_i.chan_enable.eq(chan_enable),
 			self.o.noise_i.period.eq(noise_period),
 			self.o.noise_i.mode.eq(noise_mode),
+			self.o.noise_i.vol.eq(Repl(noise_on, VOL_BITS))
 		]
 
 		# -------------------------------------
@@ -76,6 +76,8 @@ class UartCmd(Elaboratable):
 				with m.Case(ord('w')):
 					m.d.sync += noise_mode.eq(~noise_mode)
 					m.d.sync += self.o.noise_we.mode.eq(1)
-
+				with m.Case(ord('0')):
+					m.d.sync += noise_on.eq(~noise_on)
+					m.d.sync += self.o.noise_we.vol.eq(1)
 
 		return m

@@ -11,7 +11,7 @@ CLK_RATE         = 16777216
 SAMPLE_RATE      = 16384
 SAMPLE_CYCS      = CLK_RATE // SAMPLE_RATE
 CLK_PERIOD       = 1 / CLK_RATE
-BAUDRATE         = 9600
+BAUDRATE         = 38400
 SAMPLE_ADDR_BITS = 9
 SAMPLE_BITS      = 4
 VOL_BITS         = 4
@@ -22,10 +22,10 @@ CHANNEL_INIT_VALUES = [
 	{ 'rate': 0x00C000, 'length': 0x3F, 'start': 0x00, 'vol': 0x0F }, # 1
 	{ 'rate': 0x012000, 'length': 0x3F, 'start': 0x00, 'vol': 0x0F }, # 2
 	{ 'rate': 0x024000, 'length': 0x3F, 'start': 0x00, 'vol': 0x0F }, # 3
-	{ 'rate': 0x004000, 'length': 0x3F, 'start': 0x40, 'vol': 0x0F }, # 4
-	{ 'rate': 0x006000, 'length': 0x3F, 'start': 0x40, 'vol': 0x0F }, # 5
-	{ 'rate': 0x009000, 'length': 0x3F, 'start': 0x40, 'vol': 0x0F }, # 6
-	{ 'rate': 0x012000, 'length': 0x3F, 'start': 0x40, 'vol': 0x0F }, # 7
+	{ 'rate': 0x003000, 'length': 0x3F, 'start': 0x40, 'vol': 0x0F }, # 4
+	{ 'rate': 0x004800, 'length': 0x3F, 'start': 0x40, 'vol': 0x0F }, # 5
+	{ 'rate': 0x006C00, 'length': 0x3F, 'start': 0x40, 'vol': 0x0F }, # 6
+	{ 'rate': 0x00D800, 'length': 0x3F, 'start': 0x40, 'vol': 0x0F }, # 7
 ]
 
 DUMMY_RAM = [

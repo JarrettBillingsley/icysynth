@@ -62,6 +62,12 @@ def serial_send(rx, divisor, data):
 	yield rx.eq(1)
 	yield from delay(divisor + 2)
 
+def serial_cmd(r, d, op, a0 = 0, a1 = 0, a2 = 0):
+	yield from serial_send(r, d, op)
+	yield from serial_send(r, d, a0)
+	yield from serial_send(r, d, a1)
+	yield from serial_send(r, d, a2)
+
 def test_serial(cmd):
 	d = cmd.uart.divisor
 	yield from delay(2)
@@ -69,13 +75,25 @@ def test_serial(cmd):
 	yield from serial_send(cmd.rx, d, ord('2'))
 	yield from serial_send(cmd.rx, d, ord('3'))
 
+def test_serial2(cmd):
+	r = cmd.rx
+	d = cmd.uart.divisor
+	yield from delay(2)
+	yield from serial_cmd(r, d, 0x00)
+	yield from delay(10)
+	yield from serial_cmd(r, d, 0x07, 0xFF)
+	yield from delay(10)
+	yield from serial_cmd(r, d, 0x02, 0)
+	yield from delay(100)
+	yield from serial_cmd(r, d, 0x02, 4)
+
 def simulate(top, synth):
 	sim = Simulator(top)
 	sim.add_clock(CLK_PERIOD)
 
 	def shim():
 		yield from test_setup_synth(synth)
-		# yield from test_serial(synth.cmd)
+		yield from test_serial2(synth.cmd)
 	sim.add_sync_process(shim)
 
 	# BUG: nmigen currently ignores the 'traces' param on this function,

@@ -26,6 +26,7 @@ class Sampler(Elaboratable):
 
 		self.o        = Signal(range(self.acc_range))
 		self.ram_addr = Signal(SAMPLE_ADDR_BITS)
+		self.busy     = Signal()
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
@@ -77,12 +78,6 @@ class Sampler(Elaboratable):
 		m.d.sync += cycle_counter.eq(cycle_counter + 1)
 
 		with m.FSM(name='mix_fsm') as fsm:
-			with m.State('OUTPUT'):
-				m.d.sync += self.o.eq(acc)
-				m.d.sync += acc.eq(0)
-				m.d.sync += phase_reset.eq(0)
-				m.next = 'UPDATE0'
-
 			for i, ch in enumerate(channels):
 				with m.State(f'UPDATE{i}'):
 					with m.If(chan_enable[i]):
@@ -106,11 +101,18 @@ class Sampler(Elaboratable):
 					with m.If(chan_enable[i]):
 						m.d.sync += acc.eq(acc + volume_rom.rdat)
 
-					m.next = 'WAIT' if i == self.num_channels - 1 else f'UPDATE{i+1}'
+					m.next = 'OUTPUT' if i == self.num_channels - 1 else f'UPDATE{i+1}'
+
+			with m.State('OUTPUT'):
+				m.d.sync += self.o.eq(acc)
+				m.d.sync += acc.eq(0)
+				m.d.sync += phase_reset.eq(0)
+				m.next = 'WAIT'
 
 			with m.State('WAIT'):
 				with m.If(cycle_counter == self.sample_cycs - 1):
 					m.d.sync += cycle_counter.eq(0)
-					m.next = 'OUTPUT'
+					m.next = 'UPDATE0'
 
+		m.d.comb += self.busy.eq(~fsm.ongoing('WAIT'))
 		return m

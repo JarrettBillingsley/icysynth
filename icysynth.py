@@ -44,7 +44,7 @@ class IcySynth(Elaboratable):
 
 		# for simulation, set it to BAUDRATE * 5 so that it doesn't take
 		# an age for each bit transition
-		uart_freq = BAUDRATE * 5
+		uart_freq = BAUDRATE * 2
 
 		if platform:
 			pll = PLL(platform.default_clk_frequency / 1_000_000, CLK_RATE / 1_000_000)
@@ -67,6 +67,7 @@ class IcySynth(Elaboratable):
 		m.d.comb += [
 			# CMD -> Sampler
 			self.sampler.i.eq(self.cmd.o.sampler_i),
+			self.cmd.busy.eq(self.sampler.busy),
 
 			# CMD -> RAM
 			self.ram.waddr.eq(self.cmd.o.ram_waddr),

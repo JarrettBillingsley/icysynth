@@ -94,7 +94,9 @@ class Sampler(Elaboratable):
 					m.next = f'VOL_FETCH{i}'
 
 				with m.State(f'VOL_FETCH{i}'):
-					m.d.comb += volume_rom.addr.eq(Cat(self.i.ram_data, ch.vol))
+					which = ch.phase[-SAMPLE_ADDR_BITS - 1]
+					samp = Mux(which, self.i.ram_data_1, self.i.ram_data_0)
+					m.d.comb += volume_rom.addr.eq(Cat(samp, ch.vol))
 					m.next = f'ACCUM{i}'
 
 				with m.State(f'ACCUM{i}'):

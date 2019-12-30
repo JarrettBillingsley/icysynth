@@ -57,7 +57,8 @@ class SamplerInputLayout(Layout):
 			('chan_select',    range(num_channels)),
 			('chan_i',         WaveStateLayout()  ),
 			('chan_we',        WaveEnableLayout() ),
-			('ram_data',       SAMPLE_BITS        ),
+			('ram_data_0',     SAMPLE_BITS        ),
+			('ram_data_1',     SAMPLE_BITS        ),
 		])
 
 class CommandOutputLayout(Layout):
@@ -68,7 +69,7 @@ class CommandOutputLayout(Layout):
 			('mixer_i',   MixerStateLayout(bits_over_8)),
 			('mixer_we',  MixerEnableLayout()),
 			('ram_waddr', SAMPLE_ADDR_BITS),
-			('ram_wdata', SAMPLE_BITS),
+			('ram_wdata', 2 * SAMPLE_BITS),
 			('ram_we',    1),
 		])
 

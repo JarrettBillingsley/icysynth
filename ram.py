@@ -13,7 +13,7 @@ class SampleRam(Elaboratable):
 		# Inputs
 
 		self.waddr = Signal(SAMPLE_ADDR_BITS)
-		self.wdata = Signal(SAMPLE_BITS)
+		self.wdata = Signal(2 * SAMPLE_BITS)
 		self.we    = Signal(1)
 
 		self.raddr = Signal(SAMPLE_ADDR_BITS)
@@ -21,7 +21,8 @@ class SampleRam(Elaboratable):
 		# -------------------------------------
 		# Outputs
 
-		self.rdata = Signal(SAMPLE_BITS)
+		self.rdata_0 = Signal(SAMPLE_BITS)
+		self.rdata_1 = Signal(SAMPLE_BITS)
 
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
@@ -30,7 +31,7 @@ class SampleRam(Elaboratable):
 		# Submodules
 
 		mem = Memory(
-			width = SAMPLE_BITS,
+			width = 2 * SAMPLE_BITS,
 			depth = (1 << SAMPLE_ADDR_BITS),
 			init = DUMMY_RAM,
 			name = 'sample_ram'
@@ -47,7 +48,8 @@ class SampleRam(Elaboratable):
 			wrport.en.  eq(self.we),
 
 			rdport.addr.eq(self.raddr),
-			self.rdata. eq(rdport.data),
+			self.rdata_0.eq(rdport.data[-4:]),
+			self.rdata_1.eq(rdport.data[:4]),
 		]
 
 		return m

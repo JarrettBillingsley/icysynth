@@ -76,7 +76,8 @@ class IcySynth(Elaboratable):
 
 			# Sampler <-> RAM
 			self.ram.raddr.eq(self.sampler.ram_addr),
-			self.sampler.i.ram_data.eq(self.ram.rdata),
+			self.sampler.i.ram_data_0.eq(self.ram.rdata_0),
+			self.sampler.i.ram_data_1.eq(self.ram.rdata_1),
 
 			# CMD -> Noise
 			self.noise.i.eq(self.cmd.o.noise_i),

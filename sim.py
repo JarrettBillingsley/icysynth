@@ -45,9 +45,9 @@ def test_setup_synth(synth):
 	yield mix.i.mix_shift.eq(3)
 	yield from toggle_enable(samp.i.chan_enable_we, mix.we.mix_shift)
 
-def serial_send(cmd, data):
-	rx = cmd.rx
-	divisor = cmd.uart.divisor
+def serial_send(uart, data):
+	rx = uart.rx
+	divisor = uart.uart.divisor
 
 	yield rx.eq(1)
 	yield from delay(3)
@@ -69,19 +69,19 @@ def wait_for(signal, value = 1):
 	while (yield signal) != value:
 		yield
 
-def serial_cmd(cmd, op, a0 = 0, a1 = 0, a2 = 0):
-	yield from wait_for(cmd.cts, 1)
-	yield from serial_send(cmd, op)
-	yield from serial_send(cmd, a0)
-	yield from serial_send(cmd, a1)
-	yield from serial_send(cmd, a2)
-	yield from wait_for(cmd.cts, 0)
-	yield from wait_for(cmd.cts, 1)
+def serial_cmd(uart, op, a0 = 0, a1 = 0, a2 = 0):
+	yield from wait_for(uart.cts, 1)
+	yield from serial_send(uart, op)
+	yield from serial_send(uart, a0)
+	yield from serial_send(uart, a1)
+	yield from serial_send(uart, a2)
+	yield from wait_for(uart.cts, 0)
+	yield from wait_for(uart.cts, 1)
 
-def test_serial(cmd):
-	yield from serial_cmd(cmd, 0xAA)
-	yield from serial_cmd(cmd, 0)
-	yield from serial_cmd(cmd, 0)
+def test_serial(uart):
+	yield from serial_cmd(uart, 0)
+	yield from serial_cmd(uart, 1)
+	yield from serial_cmd(uart, 0x80, 0x12, 0x34, 0x56)
 
 def simulate(top, synth):
 	sim = Simulator(top)
@@ -89,7 +89,7 @@ def simulate(top, synth):
 
 	def shim():
 		# yield from test_setup_synth(synth)
-		yield from test_serial(synth.cmd)
+		yield from test_serial(synth.uart)
 	sim.add_sync_process(shim)
 
 	# BUG: nmigen currently ignores the 'traces' param on this function,

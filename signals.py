@@ -61,6 +61,15 @@ class SamplerInputLayout(Layout):
 			('ram_data_1',     SAMPLE_BITS        ),
 		])
 
+class CommandInputLayout(Layout):
+	def __init__(self): super().__init__([
+			('cmd_ready', 1),
+			('cmd_op',    8),
+			('cmd_arg_0', 8),
+			('cmd_arg_1', 8),
+			('cmd_arg_2', 8),
+		])
+
 class CommandOutputLayout(Layout):
 	def __init__(self, num_channels, bits_over_8): super().__init__([
 			('sampler_i', SamplerInputLayout(num_channels)),
@@ -95,5 +104,7 @@ class MixerState(Record):
 class MixerEnable(Record):
 	def __init__(self): super().__init__(MixerEnableLayout())
 
+class CommandInput(Record):
+	def __init__(self): super().__init__(CommandInputLayout())
 class CommandOutput(Record):
 	def __init__(self, n, b): super().__init__(CommandOutputLayout(n, b))

@@ -6,6 +6,7 @@ from nmigen.back import verilog
 from nmigen.back.pysim import *
 from nmigen.hdl.rec import *
 
+from cmd import *
 from constants import *
 from mixer import *
 from noise import *
@@ -42,7 +43,7 @@ class IcySynth(Elaboratable):
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
 
-		uart_freq = CLK_RATE
+		uart_freq = BAUDRATE * 2
 
 		if platform:
 			pll = PLL(platform.default_clk_frequency / 1_000_000, CLK_RATE / 1_000_000)
@@ -53,9 +54,11 @@ class IcySynth(Elaboratable):
 
 			uart_freq = int(pll.best_fout * 1_000_000)
 
-		self.cmd = UartCmd(self.num_channels, self.mixer.bits_over_8, self.baudrate, uart_freq)
+		self.uart = UartCmd(self.baudrate, uart_freq)
+		self.cmd = Cmd(self.num_channels, self.mixer.bits_over_8)
 
 		m.submodules.cmd     = self.cmd
+		m.submodules.uart    = self.uart
 		m.submodules.ram     = self.ram
 		m.submodules.sampler = self.sampler
 		m.submodules.noise   = self.noise
@@ -63,6 +66,10 @@ class IcySynth(Elaboratable):
 		m.submodules.pwm     = self.pwm
 
 		m.d.comb += [
+			# UART <-> CMD
+			self.cmd.i.eq(self.uart.o),
+			self.uart.processing.eq(self.cmd.processing),
+
 			# CMD -> Sampler
 			self.sampler.i.eq(self.cmd.o.sampler_i),
 			self.cmd.busy.eq(self.sampler.busy),
@@ -72,11 +79,6 @@ class IcySynth(Elaboratable):
 			self.ram.wdata.eq(self.cmd.o.ram_wdata),
 			self.ram.we   .eq(self.cmd.o.ram_we),
 
-			# Sampler <-> RAM
-			self.ram.raddr.eq(self.sampler.ram_addr),
-			self.sampler.i.ram_data_0.eq(self.ram.rdata_0),
-			self.sampler.i.ram_data_1.eq(self.ram.rdata_1),
-
 			# CMD -> Noise
 			self.noise.i.eq(self.cmd.o.noise_i),
 			self.noise.we.eq(self.cmd.o.noise_we),
@@ -84,6 +86,11 @@ class IcySynth(Elaboratable):
 			# CMD -> Mixer
 			self.mixer.i.eq(self.cmd.o.mixer_i),
 			self.mixer.we.eq(self.cmd.o.mixer_we),
+
+			# Sampler <-> RAM
+			self.ram.raddr.eq(self.sampler.ram_addr),
+			self.sampler.i.ram_data_0.eq(self.ram.rdata_0),
+			self.sampler.i.ram_data_1.eq(self.ram.rdata_1),
 
 			# Mixer -> PWM
 			self.pwm.i.eq(self.mixer.o[:8]),
@@ -95,7 +102,7 @@ class IcySynth(Elaboratable):
 		if platform:
 			m.d.comb += [
 				# Pins -> UART
-				self.cmd.rx.eq(platform.request('uart').rx),
+				self.uart.rx.eq(platform.request('uart').rx),
 
 				# Sound -> THE WORLD
 				platform.request('sound_out').pin.eq(self.o),

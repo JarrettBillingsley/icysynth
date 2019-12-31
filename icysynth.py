@@ -42,9 +42,7 @@ class IcySynth(Elaboratable):
 	def elaborate(self, platform: Platform) -> Module:
 		m = Module()
 
-		# for simulation, set it to BAUDRATE * 5 so that it doesn't take
-		# an age for each bit transition
-		uart_freq = BAUDRATE * 2
+		uart_freq = CLK_RATE
 
 		if platform:
 			pll = PLL(platform.default_clk_frequency / 1_000_000, CLK_RATE / 1_000_000)

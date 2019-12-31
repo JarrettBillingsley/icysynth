@@ -45,7 +45,10 @@ def test_setup_synth(synth):
 	yield mix.i.mix_shift.eq(3)
 	yield from toggle_enable(samp.i.chan_enable_we, mix.we.mix_shift)
 
-def serial_send(rx, divisor, data):
+def serial_send(cmd, data):
+	rx = cmd.rx
+	divisor = cmd.uart.divisor
+
 	yield rx.eq(1)
 	yield from delay(3)
 
@@ -62,38 +65,31 @@ def serial_send(rx, divisor, data):
 	yield rx.eq(1)
 	yield from delay(divisor + 2)
 
-def serial_cmd(r, d, op, a0 = 0, a1 = 0, a2 = 0):
-	yield from serial_send(r, d, op)
-	yield from serial_send(r, d, a0)
-	yield from serial_send(r, d, a1)
-	yield from serial_send(r, d, a2)
+def wait_for(signal, value = 1):
+	while (yield signal) != value:
+		yield
+
+def serial_cmd(cmd, op, a0 = 0, a1 = 0, a2 = 0):
+	yield from wait_for(cmd.cts, 1)
+	yield from serial_send(cmd, op)
+	yield from serial_send(cmd, a0)
+	yield from serial_send(cmd, a1)
+	yield from serial_send(cmd, a2)
+	yield from wait_for(cmd.cts, 0)
+	yield from wait_for(cmd.cts, 1)
 
 def test_serial(cmd):
-	d = cmd.uart.divisor
-	yield from delay(2)
-	yield from serial_send(cmd.rx, d, ord('1'))
-	yield from serial_send(cmd.rx, d, ord('2'))
-	yield from serial_send(cmd.rx, d, ord('3'))
-
-def test_serial2(cmd):
-	r = cmd.rx
-	d = cmd.uart.divisor
-	yield from delay(2)
-	yield from serial_cmd(r, d, 0x00)
-	yield from delay(10)
-	yield from serial_cmd(r, d, 0x07, 0xFF)
-	yield from delay(10)
-	yield from serial_cmd(r, d, 0x02, 0)
-	yield from delay(100)
-	yield from serial_cmd(r, d, 0x02, 4)
+	yield from serial_cmd(cmd, 0xAA)
+	yield from serial_cmd(cmd, 0)
+	yield from serial_cmd(cmd, 0)
 
 def simulate(top, synth):
 	sim = Simulator(top)
 	sim.add_clock(CLK_PERIOD)
 
 	def shim():
-		yield from test_setup_synth(synth)
-		yield from test_serial2(synth.cmd)
+		# yield from test_setup_synth(synth)
+		yield from test_serial(synth.cmd)
 	sim.add_sync_process(shim)
 
 	# BUG: nmigen currently ignores the 'traces' param on this function,

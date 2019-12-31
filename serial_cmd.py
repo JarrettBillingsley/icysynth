@@ -115,19 +115,30 @@ class UartCmd(Elaboratable):
 				m.d.sync += self.o.sampler_i.chan_enable_we.eq(1)
 				self.back_to_wait(m)
 			with m.State('X0_RATE'):         # n0: (l, m, h) rate
-				# TODO
+				m.d.sync += self.o.sampler_i.chan_select.eq(self.cmd_chan)
+				m.d.sync += self.o.sampler_i.chan_i.rate.eq(Cat(*self.cmd_args))
+				m.d.sync += self.o.sampler_i.chan_we.rate.eq(1)
 				self.back_to_wait(m)
 			with m.State('X1_RESET_PHASE'):  # n1: (_, _, _) reset phase
-				# TODO
+				m.d.sync += self.o.sampler_i.chan_select.eq(self.cmd_chan)
+				m.d.sync += self.o.sampler_i.chan_we.phase.eq(1)
 				self.back_to_wait(m)
 			with m.State('X2_RATE_RESET'):   # n2: (l, m, h) rate + reset phase
-				# TODO
+				m.d.sync += self.o.sampler_i.chan_select.eq(self.cmd_chan)
+				m.d.sync += self.o.sampler_i.chan_i.rate.eq(Cat(*self.cmd_args))
+				m.d.sync += self.o.sampler_i.chan_we.rate.eq(1)
+				m.d.sync += self.o.sampler_i.chan_we.phase.eq(1)
 				self.back_to_wait(m)
 			with m.State('X3_SAMPLE'):       # n3: (s, l, _) sample
-				# TODO
+				m.d.sync += self.o.sampler_i.chan_select.eq(self.cmd_chan)
+				m.d.sync += self.o.sampler_i.chan_i.start.eq(self.cmd_args[0])
+				m.d.sync += self.o.sampler_i.chan_i.length.eq(self.cmd_args[1])
+				m.d.sync += self.o.sampler_i.chan_we.sample.eq(1)
 				self.back_to_wait(m)
 			with m.State('X4_VOLUME'):       # n4: (v, _, _) volume
-				# TODO
+				m.d.sync += self.o.sampler_i.chan_select.eq(self.cmd_chan)
+				m.d.sync += self.o.sampler_i.chan_i.vol.eq(self.cmd_args[0])
+				m.d.sync += self.o.sampler_i.chan_we.vol.eq(1)
 				self.back_to_wait(m)
 
 		return m

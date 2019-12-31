@@ -2,6 +2,23 @@ from nmigen import *
 from nmigen.back.pysim import *
 from nmigen.build import Resource, Subsignal, Pins
 
+class XDomainLatch(Elaboratable):
+	def __init__(self):
+		super().__init__()
+		self.i       = Signal()
+		self.rising  = Signal()
+		self.falling = Signal()
+
+	def elaborate(self, platform):
+		m = Module()
+
+		latch = Signal(3)
+		m.d.sync += latch.eq(Cat(self.i, latch[:2]))
+		m.d.comb += self.rising.eq(latch[1:] == 0b01)
+		m.d.comb += self.falling.eq(latch[1:] == 0b10)
+
+		return m
+
 # Dead simple super stupid SPI receiver.
 class SPIReceiver(Elaboratable):
 	def __init__(self, data_len):
@@ -30,36 +47,46 @@ class SPIReceiver(Elaboratable):
 			ssel = Signal(name='i_ssel')
 			m.d.comb += [mosi.eq(self.i_mosi), sclk.eq(self.i_sclk), ssel.eq(self.i_ssel)]
 
-		sclk_latch = Signal()
-		sclk_edge  = Signal()
-		m.d.sync += sclk_latch.eq(self.i_sclk)
-		m.d.comb += sclk_edge.eq((self.i_sclk) & ~(sclk_latch))
+		# Latches for SCLK and SSEL (three-stage to reliably sample across clock domains)
+		sclk = XDomainLatch()
+		ssel = XDomainLatch()
+		m.submodules.sclk_latch = sclk
+		m.submodules.ssel_latch = ssel
+		m.d.comb += sclk.i.eq(self.i_sclk)
+		m.d.comb += ssel.i.eq(self.i_ssel)
+
+		# Latch for MOSI
+		mosi_latch = Signal(2)
+		m.d.sync += mosi_latch.eq(Cat(self.i_mosi, mosi_latch[0]))
+		mosi = mosi_latch[1]
 
 		with m.FSM(name = 'spi_fsm'):
 			with m.State('IDLE'):
-				with m.If(self.i_ssel == 0):
+				with m.If(ssel.falling):
 					m.d.sync += self.o_done.eq(0)
 					m.next = 'RECV'
 
 			with m.State('RECV'):
-				with m.If(sclk_edge):
-					m.d.sync += self.o_data.eq(Cat(self.o_data[1:], self.i_mosi))
-				with m.Elif(self.i_ssel == 1):
+				with m.If(sclk.rising):
+					m.d.sync += self.o_data.eq(Cat(self.o_data[1:], mosi))
+				with m.Elif(ssel.rising):
 					m.d.sync += self.o_done.eq(1)
 					m.next = 'IDLE'
 
 		return m
 
 def transfer(spi, length, val):
+	yield spi.i_ssel.eq(0)
+	yield
+
 	for i in range(length):
 		yield spi.i_mosi.eq(val & 1)
 		yield spi.i_sclk.eq(1)
 		yield
 		yield spi.i_sclk.eq(0)
 		yield
-		yield
-		yield
 		val >>= 1
+	yield spi.i_ssel.eq(1)
 
 def delay(n):
     return [None] * n
@@ -67,14 +94,9 @@ def delay(n):
 def test(top):
 	spi = top.submodules.spi
 
-	yield spi.i_ssel.eq(1)
+	# yield spi.i_ssel.eq(1)
 	yield from delay(3)
-
-	yield spi.i_ssel.eq(0)
-	yield
-	yield from transfer(spi, 8, 0xA5)
-	yield spi.i_ssel.eq(1)
-	yield
+	yield from transfer(spi, 32, 0xDEADBEEF)
 
 def build(top):
 	from nmigen_boards.icestick import ICEStickPlatform
@@ -100,19 +122,21 @@ def build(top):
 
 	platform.build(top, do_program = False)
 
+CLK_PERIOD = 1 / 16777216
+
 def sim(top):
 	sim = Simulator(top)
-	sim.add_clock(1e-6)
+	sim.add_clock(CLK_PERIOD)
 	def shim():
 		yield from test(top)
 	sim.add_sync_process(shim)
 
 	with sim.write_vcd("spi.vcd"):
-		sim.run_until(1e-6 * 300, run_passive = True)
+		sim.run_until(CLK_PERIOD * 300, run_passive = True)
 
 if __name__ == "__main__":
 	top = Module()
-	top.submodules.spi = SPIReceiver(8)
+	top.submodules.spi = SPIReceiver(32)
 
-	build(top)
-	# sim(top)
+	# build(top)
+	sim(top)

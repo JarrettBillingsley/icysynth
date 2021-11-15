@@ -40,7 +40,7 @@ class UartCmd(Elaboratable):
 		# -------------------------------------
 		# Submodules
 
-		m.submodules.uart = self.uart = UARTRx(divisor = self.divisor)
+		m.submodules.uart_rx = self.uart = UARTRx(divisor = self.divisor)
 
 		# -------------------------------------
 		# Internal State

@@ -17,7 +17,7 @@ class Cmd(Elaboratable):
 		self.i = CommandInput()
 
 		# From the sampler
-		self.busy      = Signal()
+		self.busy = Signal()
 
 		# -------------------------------------
 		# Outputs
@@ -35,11 +35,21 @@ class Cmd(Elaboratable):
 		# -------------------------------------
 		# Combinational Logic
 
-		m.d.comb += [
-		]
-
 		cmd_chan = self.i.cmd_op[4:7]
 		rate = Cat(self.i.cmd_arg_0, self.i.cmd_arg_1, self.i.cmd_arg_2)
+
+		m.d.comb += [
+			self.o.sampler_i.chan_select.eq(cmd_chan),
+			self.o.sampler_i.chan_i.rate.eq(rate),
+			self.o.sampler_i.chan_i.start.eq(self.i.cmd_arg_0),
+			self.o.sampler_i.chan_i.length.eq(self.i.cmd_arg_1),
+			self.o.sampler_i.chan_i.vol.eq(self.i.cmd_arg_0),
+			self.o.mixer_i.mix_shift.eq(self.i.cmd_arg_0),
+			self.o.noise_i.vol.eq(self.i.cmd_arg_0),
+			self.o.noise_i.period.eq(self.i.cmd_arg_0),
+			self.o.sampler_i.chan_enable.eq(self.i.cmd_arg_0),
+			self.o.noise_i.mode.eq(self.i.cmd_arg_1),
+		]
 
 		# -------------------------------------
 		# Sequential Logic
@@ -61,25 +71,21 @@ class Cmd(Elaboratable):
 				with m.If(self.i.cmd_ready):
 					self.dispatch(m)
 			with m.State('00_SILENCE'):      # 00: (_, _, _) silence
-				m.d.sync += self.o.sampler_i.chan_enable.eq(0)
+				m.d.comb += self.o.sampler_i.chan_enable.eq(0)
 				m.d.sync += self.o.sampler_i.chan_enable_we.eq(1)
-				m.d.sync += self.o.noise_i.vol.eq(0)
+				m.d.comb += self.o.noise_i.vol.eq(0)
 				m.d.sync += self.o.noise_we.vol.eq(1)
 				m.next = 'WAIT'
 			with m.State('01_UNUSED'):       # 01: (_, _, _) (unused, commit)
 				m.next = 'WAIT'
 			with m.State('02_MIX_SHIFT'):    # 02: (s, _, _) mix shift
-				m.d.sync += self.o.mixer_i.mix_shift.eq(self.i.cmd_arg_0)
 				m.d.sync += self.o.mixer_we.mix_shift.eq(1)
 				m.next = 'WAIT'
 			with m.State('03_NOISE_VOLUME'): # 03: (v, _, _) noise vol
-				m.d.sync += self.o.noise_i.vol.eq(self.i.cmd_arg_0)
 				m.d.sync += self.o.noise_we.vol.eq(1)
 				m.next = 'WAIT'
 			with m.State('04_NOISE_PERIOD'): # 04: (p, m, _) noise period/mode
-				m.d.sync += self.o.noise_i.period.eq(self.i.cmd_arg_0)
 				m.d.sync += self.o.noise_we.period.eq(1)
-				m.d.sync += self.o.noise_i.mode.eq(self.i.cmd_arg_1)
 				m.d.sync += self.o.noise_we.mode.eq(1)
 				m.next = 'WAIT'
 			with m.State('05_SAMPLE_2'):     # 05: (a, v, _) set sample byte?
@@ -89,34 +95,23 @@ class Cmd(Elaboratable):
 				# TODO
 				m.next = 'WAIT'
 			with m.State('07_CHAN_ENABLE'):  # 07: (m, _, _) channel enable mask
-				m.d.sync += self.o.sampler_i.chan_enable.eq(self.i.cmd_arg_0)
 				m.d.sync += self.o.sampler_i.chan_enable_we.eq(1)
 				m.next = 'WAIT'
 			with m.State('X0_RATE'):         # n0: (l, m, h) rate
-				m.d.sync += self.o.sampler_i.chan_select.eq(cmd_chan)
-				m.d.sync += self.o.sampler_i.chan_i.rate.eq(rate)
 				m.d.sync += self.o.sampler_i.chan_we.rate.eq(1)
 				m.next = 'WAIT'
 			with m.State('X1_RESET_PHASE'):  # n1: (_, _, _) reset phase
-				m.d.sync += self.o.sampler_i.chan_select.eq(cmd_chan)
-				m.d.sync += self.o.sampler_i.chan_we.phase.eq(1)
+				# m.d.sync += self.o.sampler_i.chan_we.phase.eq(1)
 				m.next = 'WAIT'
 			with m.State('X2_RATE_RESET'):   # n2: (l, m, h) rate + reset phase
-				m.d.sync += self.o.sampler_i.chan_select.eq(cmd_chan)
-				m.d.sync += self.o.sampler_i.chan_i.rate.eq(rate)
-				m.d.sync += self.o.sampler_i.chan_we.rate.eq(1)
-				m.d.sync += self.o.sampler_i.chan_we.phase.eq(1)
+				# m.d.sync += self.o.sampler_i.chan_we.rate.eq(1)
+				# m.d.sync += self.o.sampler_i.chan_we.phase.eq(1)
 				m.next = 'WAIT'
 			with m.State('X3_SAMPLE'):       # n3: (s, l, _) sample
-				m.d.sync += self.o.sampler_i.chan_select.eq(cmd_chan)
-				m.d.sync += self.o.sampler_i.chan_i.start.eq(self.i.cmd_arg_0)
-				m.d.sync += self.o.sampler_i.chan_i.length.eq(self.i.cmd_arg_1)
-				m.d.sync += self.o.sampler_i.chan_we.sample.eq(1)
+				# m.d.sync += self.o.sampler_i.chan_we.sample.eq(1)
 				m.next = 'WAIT'
 			with m.State('X4_VOLUME'):       # n4: (v, _, _) volume
-				m.d.sync += self.o.sampler_i.chan_select.eq(cmd_chan)
-				m.d.sync += self.o.sampler_i.chan_i.vol.eq(self.i.cmd_arg_0)
-				m.d.sync += self.o.sampler_i.chan_we.vol.eq(1)
+				# m.d.sync += self.o.sampler_i.chan_we.vol.eq(1)
 				m.next = 'WAIT'
 
 		m.d.comb += self.processing.eq(~fsm.ongoing('WAIT'))

@@ -1,5 +1,5 @@
 from nmigen import *
-from nmigen.back.pysim import *
+from nmigen.sim import *
 from nmigen.build import Resource, Subsignal, Pins
 
 class XDomainLatch(Elaboratable):

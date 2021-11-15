@@ -1,0 +1,884 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project source="2.7.2" version="1.0">
+  This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
+
+  <lib desc="#Wiring" name="0"/>
+  <lib desc="#Gates" name="1"/>
+  <lib desc="#Plexers" name="2">
+    <tool name="Multiplexer">
+      <a name="select" val="3"/>
+      <a name="width" val="8"/>
+    </tool>
+  </lib>
+  <lib desc="#Arithmetic" name="3"/>
+  <lib desc="#Memory" name="4">
+    <tool name="ROM">
+      <a name="contents">addr/data: 8 8
+0
+</a>
+    </tool>
+  </lib>
+  <lib desc="#I/O" name="5"/>
+  <lib desc="#Base" name="6">
+    <tool name="Text Tool">
+      <a name="text" val=""/>
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="halign" val="center"/>
+      <a name="valign" val="base"/>
+    </tool>
+  </lib>
+  <main name="main"/>
+  <options>
+    <a name="gateUndefined" val="ignore"/>
+    <a name="simlimit" val="1000"/>
+    <a name="simrand" val="0"/>
+  </options>
+  <mappings>
+    <tool lib="6" map="Button2" name="Menu Tool"/>
+    <tool lib="6" map="Button3" name="Menu Tool"/>
+    <tool lib="6" map="Ctrl Button1" name="Menu Tool"/>
+  </mappings>
+  <toolbar>
+    <tool lib="6" name="Poke Tool"/>
+    <tool lib="6" name="Edit Tool"/>
+    <tool lib="6" name="Text Tool">
+      <a name="text" val=""/>
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="halign" val="center"/>
+      <a name="valign" val="base"/>
+    </tool>
+    <sep/>
+    <tool lib="0" name="Pin">
+      <a name="tristate" val="false"/>
+    </tool>
+    <tool lib="0" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="labelloc" val="east"/>
+    </tool>
+    <tool lib="1" name="NOT Gate"/>
+    <tool lib="1" name="AND Gate"/>
+    <tool lib="1" name="OR Gate"/>
+  </toolbar>
+  <circuit name="main">
+    <a name="circuit" val="main"/>
+    <a name="clabel" val=""/>
+    <a name="clabelup" val="east"/>
+    <a name="clabelfont" val="SansSerif plain 12"/>
+    <wire from="(190,30)" to="(190,40)"/>
+    <wire from="(270,190)" to="(270,200)"/>
+    <wire from="(270,30)" to="(270,40)"/>
+    <wire from="(110,100)" to="(150,100)"/>
+    <wire from="(310,100)" to="(310,330)"/>
+    <wire from="(230,360)" to="(320,360)"/>
+    <wire from="(290,100)" to="(310,100)"/>
+    <wire from="(300,300)" to="(300,340)"/>
+    <wire from="(130,160)" to="(150,160)"/>
+    <wire from="(130,140)" to="(150,140)"/>
+    <wire from="(130,120)" to="(150,120)"/>
+    <wire from="(230,140)" to="(250,140)"/>
+    <wire from="(230,220)" to="(250,220)"/>
+    <wire from="(230,280)" to="(250,280)"/>
+    <wire from="(230,160)" to="(250,160)"/>
+    <wire from="(230,120)" to="(250,120)"/>
+    <wire from="(230,100)" to="(250,100)"/>
+    <wire from="(230,300)" to="(250,300)"/>
+    <wire from="(230,320)" to="(250,320)"/>
+    <wire from="(230,60)" to="(250,60)"/>
+    <wire from="(230,80)" to="(250,80)"/>
+    <wire from="(400,340)" to="(410,340)"/>
+    <wire from="(310,330)" to="(320,330)"/>
+    <wire from="(190,30)" to="(270,30)"/>
+    <wire from="(360,340)" to="(370,340)"/>
+    <wire from="(110,100)" to="(110,110)"/>
+    <wire from="(260,190)" to="(260,200)"/>
+    <wire from="(280,190)" to="(280,200)"/>
+    <wire from="(230,350)" to="(320,350)"/>
+    <wire from="(300,340)" to="(320,340)"/>
+    <wire from="(70,130)" to="(90,130)"/>
+    <wire from="(70,150)" to="(90,150)"/>
+    <wire from="(130,130)" to="(150,130)"/>
+    <wire from="(130,150)" to="(150,150)"/>
+    <wire from="(230,150)" to="(250,150)"/>
+    <wire from="(230,230)" to="(250,230)"/>
+    <wire from="(230,290)" to="(250,290)"/>
+    <wire from="(230,210)" to="(250,210)"/>
+    <wire from="(230,110)" to="(250,110)"/>
+    <wire from="(230,130)" to="(250,130)"/>
+    <wire from="(230,330)" to="(250,330)"/>
+    <wire from="(230,310)" to="(250,310)"/>
+    <wire from="(230,50)" to="(250,50)"/>
+    <wire from="(230,90)" to="(250,90)"/>
+    <wire from="(230,70)" to="(250,70)"/>
+    <wire from="(290,300)" to="(300,300)"/>
+    <comp loc="(360,340)" name="mixer"/>
+    <comp loc="(230,50)" name="cmd"/>
+    <comp loc="(400,340)" name="pwm"/>
+    <comp loc="(290,300)" name="noise"/>
+    <comp lib="0" loc="(410,340)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="sound out"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp loc="(290,220)" name="sample ram"/>
+    <comp lib="0" loc="(70,150)" name="Pin">
+      <a name="output" val="true"/>
+      <a name="label" val="cts"/>
+    </comp>
+    <comp loc="(130,120)" name="uart cmd"/>
+    <comp lib="6" loc="(53,114)" name="Text">
+      <a name="text" val="(Host)"/>
+    </comp>
+    <comp loc="(290,100)" name="sampler"/>
+    <comp lib="0" loc="(70,130)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="rx"/>
+    </comp>
+  </circuit>
+  <circuit name="cmd">
+    <a name="circuit" val="cmd"/>
+    <a name="clabel" val=""/>
+    <a name="clabelup" val="north"/>
+    <a name="clabelfont" val="SansSerif plain 12"/>
+    <appear>
+      <rect fill="none" height="330" stroke="#000000" stroke-width="2" width="80" x="40" y="50"/>
+      <text font-family="SansSerif" font-size="12" text-anchor="end" x="110" y="70">sampler</text>
+      <text font-family="SansSerif" font-size="12" text-anchor="end" x="110" y="292">noise</text>
+      <text font-family="SansSerif" font-size="12" text-anchor="end" x="112" y="363">mixer</text>
+      <text font-family="SansSerif" font-size="12" text-anchor="end" x="113" y="222">sample</text>
+      <text font-family="SansSerif" font-size="12" text-anchor="end" x="113" y="235">ram</text>
+      <text font-family="SansSerif" font-size="12" text-anchor="start" x="40" y="113">&lt;processing</text>
+      <text font-family="SansSerif" font-size="16" font-weight="bold" text-anchor="middle" x="79" y="162">CMD</text>
+      <circ-port height="8" pin="200,20" width="8" x="36" y="126"/>
+      <circ-port height="8" pin="200,50" width="8" x="36" y="136"/>
+      <circ-port height="8" pin="200,80" width="8" x="36" y="146"/>
+      <circ-port height="8" pin="200,110" width="8" x="36" y="156"/>
+      <circ-port height="8" pin="200,140" width="8" x="36" y="166"/>
+      <circ-port height="8" pin="200,220" width="8" x="76" y="46"/>
+      <circ-port height="10" pin="300,20" width="10" x="115" y="55"/>
+      <circ-port height="10" pin="300,50" width="10" x="115" y="65"/>
+      <circ-port height="10" pin="300,80" width="10" x="115" y="75"/>
+      <circ-port height="10" pin="300,130" width="10" x="115" y="85"/>
+      <circ-port height="10" pin="300,200" width="10" x="115" y="95"/>
+      <circ-port height="10" pin="300,250" width="10" x="115" y="105"/>
+      <circ-port height="10" pin="300,280" width="10" x="115" y="115"/>
+      <circ-port height="10" pin="300,310" width="10" x="115" y="125"/>
+      <circ-port height="10" pin="300,340" width="10" x="115" y="135"/>
+      <circ-port height="10" pin="300,370" width="10" x="115" y="145"/>
+      <circ-port height="10" pin="300,400" width="10" x="115" y="155"/>
+      <circ-port height="10" pin="300,430" width="10" x="115" y="165"/>
+      <circ-port height="10" pin="300,460" width="10" x="115" y="175"/>
+      <circ-port height="10" pin="300,490" width="10" x="115" y="185"/>
+      <circ-port height="10" pin="300,980" width="10" x="35" y="105"/>
+      <circ-port height="10" pin="300,560" width="10" x="115" y="285"/>
+      <circ-port height="10" pin="300,590" width="10" x="115" y="295"/>
+      <circ-port height="10" pin="300,620" width="10" x="115" y="305"/>
+      <circ-port height="10" pin="300,650" width="10" x="115" y="315"/>
+      <circ-port height="10" pin="300,680" width="10" x="115" y="325"/>
+      <circ-port height="10" pin="300,710" width="10" x="115" y="335"/>
+      <circ-port height="10" pin="300,780" width="10" x="115" y="355"/>
+      <circ-port height="10" pin="300,810" width="10" x="115" y="365"/>
+      <circ-port height="10" pin="300,870" width="10" x="115" y="215"/>
+      <circ-port height="10" pin="300,900" width="10" x="115" y="225"/>
+      <circ-port height="10" pin="300,930" width="10" x="115" y="235"/>
+      <circ-anchor facing="east" height="6" width="6" x="117" y="57"/>
+    </appear>
+    <comp lib="0" loc="(300,280)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="label" val="sampler_i.chan_i.length"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,710)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(200,110)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.cmd_arg_1"/>
+    </comp>
+    <comp lib="0" loc="(300,370)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="sampler_i.chan_we.rate"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,20)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,870)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(200,220)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="busy"/>
+    </comp>
+    <comp lib="0" loc="(300,650)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,280)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,930)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="ram_we"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,650)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="noise_we.period"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,490)" name="Constant">
+      <a name="width" val="4"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,560)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="label" val="noise_i.period"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,460)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="4"/>
+      <a name="label" val="sampler_i.ram_data_0"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,980)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="processing"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,200)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="24"/>
+      <a name="label" val="sampler_i.chan_i.rate"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,340)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,80)" name="Constant">
+      <a name="width" val="3"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,780)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="3"/>
+      <a name="label" val="mixer_i.mix_shift"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,780)" name="Constant">
+      <a name="width" val="3"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,810)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,200)" name="Constant">
+      <a name="width" val="24"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,250)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,430)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,930)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,130)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="24"/>
+      <a name="label" val="sampler_i.chan_i.phase"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,680)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="noise_we.mode"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,870)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="label" val="ram_waddr"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(200,140)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.cmd_arg_2"/>
+    </comp>
+    <comp lib="0" loc="(300,310)" name="Constant">
+      <a name="width" val="4"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,810)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="mixer_we.mix_shift"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,980)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,460)" name="Constant">
+      <a name="width" val="4"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,490)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="4"/>
+      <a name="label" val="sampler_i.ram_data_1"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,400)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="sampler_i.chan_we.sample"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,50)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,430)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="sampler_i.chan_we.vol"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,680)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,900)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,80)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="3"/>
+      <a name="label" val="sampler_i.chan_select"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,560)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,130)" name="Constant">
+      <a name="width" val="24"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,250)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="label" val="sampler_i.chan_i.start"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,900)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="label" val="ram_wdata"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,620)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="4"/>
+      <a name="label" val="noise_i.vol"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,620)" name="Constant">
+      <a name="width" val="4"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,50)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="sampler_i.chan_enable_we"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,400)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(200,20)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.cmd_ready"/>
+    </comp>
+    <comp lib="0" loc="(300,710)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="noise_we.vol"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,310)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="4"/>
+      <a name="label" val="sampler_i.chan_i.vol"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,340)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="sampler_i.chan_we.phase"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,20)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="label" val="sampler_i.chan_enable"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(300,590)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(300,590)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="noise_i.mode"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(200,50)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.cmd_op"/>
+    </comp>
+    <comp lib="0" loc="(300,370)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(200,80)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.cmd_arg_0"/>
+    </comp>
+  </circuit>
+  <circuit name="mixer">
+    <a name="circuit" val="mixer"/>
+    <a name="clabel" val="mixer"/>
+    <a name="clabelup" val="east"/>
+    <a name="clabelfont" val="SansSerif plain 12"/>
+    <appear>
+      <rect fill="none" height="50" stroke="#000000" stroke-width="2" width="40" x="50" y="50"/>
+      <circ-port height="8" pin="190,70" width="8" x="46" y="56"/>
+      <circ-port height="8" pin="190,120" width="8" x="46" y="66"/>
+      <circ-port height="8" pin="190,150" width="8" x="46" y="76"/>
+      <circ-port height="8" pin="190,180" width="8" x="46" y="86"/>
+      <circ-port height="10" pin="330,100" width="10" x="85" y="65"/>
+      <circ-anchor facing="east" height="6" width="6" x="87" y="67"/>
+    </appear>
+    <comp lib="0" loc="(190,180)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="we.mix_shift"/>
+    </comp>
+    <comp lib="0" loc="(330,100)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(330,100)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="label" val="o"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(190,120)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="noise"/>
+    </comp>
+    <comp lib="0" loc="(190,150)" name="Pin">
+      <a name="width" val="3"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.mix_shift"/>
+    </comp>
+    <comp lib="0" loc="(190,70)" name="Pin">
+      <a name="width" val="11"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="sampler"/>
+    </comp>
+  </circuit>
+  <circuit name="noise">
+    <a name="circuit" val="noise"/>
+    <a name="clabel" val="noise"/>
+    <a name="clabelup" val="east"/>
+    <a name="clabelfont" val="SansSerif plain 12"/>
+    <appear>
+      <rect fill="none" height="70" stroke="#000000" stroke-width="2" width="40" x="50" y="50"/>
+      <circ-port height="8" pin="210,50" width="8" x="46" y="56"/>
+      <circ-port height="8" pin="210,80" width="8" x="46" y="66"/>
+      <circ-port height="8" pin="210,110" width="8" x="46" y="76"/>
+      <circ-port height="8" pin="210,140" width="8" x="46" y="86"/>
+      <circ-port height="8" pin="210,170" width="8" x="46" y="96"/>
+      <circ-port height="8" pin="210,200" width="8" x="46" y="106"/>
+      <circ-port height="10" pin="360,150" width="10" x="85" y="75"/>
+      <circ-anchor facing="east" height="6" width="6" x="87" y="77"/>
+    </appear>
+    <comp lib="0" loc="(210,80)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.mode"/>
+    </comp>
+    <comp lib="0" loc="(360,150)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="label" val="o"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(360,150)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(210,110)" name="Pin">
+      <a name="width" val="4"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.vol"/>
+    </comp>
+    <comp lib="0" loc="(210,200)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="we.vol"/>
+    </comp>
+    <comp lib="0" loc="(210,50)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.period"/>
+    </comp>
+    <comp lib="0" loc="(210,140)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="we.period"/>
+    </comp>
+    <comp lib="0" loc="(210,170)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="we.mode"/>
+    </comp>
+  </circuit>
+  <circuit name="pwm">
+    <a name="circuit" val="pwm"/>
+    <a name="clabel" val="pwm"/>
+    <a name="clabelup" val="east"/>
+    <a name="clabelfont" val="SansSerif plain 12"/>
+    <appear>
+      <rect fill="none" height="40" stroke="#000000" stroke-width="2" width="30" x="50" y="50"/>
+      <circ-port height="8" pin="210,120" width="8" x="46" y="66"/>
+      <circ-port height="10" pin="270,120" width="10" x="75" y="65"/>
+      <circ-anchor facing="east" height="6" width="6" x="77" y="67"/>
+    </appear>
+    <comp lib="0" loc="(210,120)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i"/>
+    </comp>
+    <comp lib="0" loc="(270,120)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="label" val="o"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(270,120)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+  </circuit>
+  <circuit name="sampler">
+    <a name="circuit" val="sampler"/>
+    <a name="clabel" val="sampler"/>
+    <a name="clabelup" val="east"/>
+    <a name="clabelfont" val="SansSerif plain 12"/>
+    <appear>
+      <rect fill="none" height="150" stroke="#000000" stroke-width="2" width="40" x="50" y="50"/>
+      <text font-family="SansSerif" font-size="12" text-anchor="middle" x="60" y="191">v</text>
+      <text font-family="SansSerif" font-size="12" text-anchor="middle" x="70" y="193">^</text>
+      <text font-family="SansSerif" font-size="12" text-anchor="middle" x="80" y="194">^</text>
+      <circ-port height="8" pin="240,30" width="8" x="46" y="56"/>
+      <circ-port height="8" pin="240,60" width="8" x="46" y="66"/>
+      <circ-port height="8" pin="240,90" width="8" x="46" y="76"/>
+      <circ-port height="8" pin="240,140" width="8" x="46" y="86"/>
+      <circ-port height="8" pin="240,210" width="8" x="46" y="96"/>
+      <circ-port height="8" pin="240,260" width="8" x="46" y="106"/>
+      <circ-port height="8" pin="240,290" width="8" x="46" y="116"/>
+      <circ-port height="8" pin="240,320" width="8" x="46" y="126"/>
+      <circ-port height="8" pin="240,350" width="8" x="46" y="136"/>
+      <circ-port height="8" pin="240,380" width="8" x="46" y="146"/>
+      <circ-port height="8" pin="240,410" width="8" x="46" y="156"/>
+      <circ-port height="8" pin="240,440" width="8" x="46" y="166"/>
+      <circ-port height="8" pin="240,470" width="8" x="66" y="196"/>
+      <circ-port height="8" pin="240,500" width="8" x="76" y="196"/>
+      <circ-port height="10" pin="410,60" width="10" x="85" y="105"/>
+      <circ-port height="10" pin="410,100" width="10" x="55" y="195"/>
+      <circ-port height="10" pin="410,130" width="10" x="65" y="45"/>
+      <circ-anchor facing="east" height="6" width="6" x="87" y="107"/>
+    </appear>
+    <comp lib="0" loc="(240,260)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_i.start"/>
+    </comp>
+    <comp lib="0" loc="(240,410)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_we.sample"/>
+    </comp>
+    <comp lib="0" loc="(240,210)" name="Pin">
+      <a name="width" val="24"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_i.rate"/>
+    </comp>
+    <comp lib="0" loc="(240,500)" name="Pin">
+      <a name="width" val="4"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.ram_data_1"/>
+    </comp>
+    <comp lib="0" loc="(410,130)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(240,140)" name="Pin">
+      <a name="width" val="24"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_i.phase"/>
+    </comp>
+    <comp lib="0" loc="(240,440)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_we.vol"/>
+    </comp>
+    <comp lib="0" loc="(240,290)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_i.length"/>
+    </comp>
+    <comp lib="0" loc="(410,130)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="busy"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(410,60)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="11"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="o"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(240,30)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_enable"/>
+    </comp>
+    <comp lib="0" loc="(240,60)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_enable_we"/>
+    </comp>
+    <comp lib="0" loc="(240,470)" name="Pin">
+      <a name="width" val="4"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.ram_data_0"/>
+    </comp>
+    <comp lib="0" loc="(240,320)" name="Pin">
+      <a name="width" val="4"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_i.vol"/>
+    </comp>
+    <comp lib="0" loc="(240,350)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_we.phase"/>
+    </comp>
+    <comp lib="0" loc="(410,100)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="ram_addr"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(410,100)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(240,380)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_we.rate"/>
+    </comp>
+    <comp lib="0" loc="(410,60)" name="Constant">
+      <a name="width" val="11"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(240,90)" name="Pin">
+      <a name="width" val="3"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="i.chan_select"/>
+    </comp>
+  </circuit>
+  <circuit name="sample ram">
+    <a name="circuit" val="sample ram"/>
+    <a name="clabel" val="smp ram"/>
+    <a name="clabelup" val="east"/>
+    <a name="clabelfont" val="SansSerif plain 12"/>
+    <appear>
+      <rect fill="none" height="60" stroke="#000000" stroke-width="2" width="40" x="50" y="50"/>
+      <circ-port height="8" pin="210,60" width="8" x="46" y="56"/>
+      <circ-port height="8" pin="210,90" width="8" x="46" y="66"/>
+      <circ-port height="8" pin="210,120" width="8" x="46" y="76"/>
+      <circ-port height="8" pin="210,180" width="8" x="56" y="46"/>
+      <circ-port height="10" pin="290,70" width="10" x="65" y="45"/>
+      <circ-port height="10" pin="290,100" width="10" x="75" y="45"/>
+      <circ-anchor facing="east" height="6" width="6" x="87" y="67"/>
+    </appear>
+    <comp lib="0" loc="(210,180)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="raddr"/>
+    </comp>
+    <comp lib="0" loc="(290,70)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="4"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="rdata_0"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(210,120)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="we"/>
+    </comp>
+    <comp lib="0" loc="(210,90)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="wdata"/>
+    </comp>
+    <comp lib="0" loc="(290,100)" name="Constant">
+      <a name="width" val="4"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(290,100)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="4"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="rdata_1"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(210,60)" name="Pin">
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="waddr"/>
+    </comp>
+    <comp lib="0" loc="(290,70)" name="Constant">
+      <a name="width" val="4"/>
+      <a name="value" val="0x0"/>
+    </comp>
+  </circuit>
+  <circuit name="uart cmd">
+    <a name="circuit" val="uart cmd"/>
+    <a name="clabel" val="UART"/>
+    <a name="clabelup" val="east"/>
+    <a name="clabelfont" val="SansSerif plain 12"/>
+    <appear>
+      <rect fill="none" height="60" stroke="#000000" stroke-width="2" width="40" x="50" y="50"/>
+      <circ-port height="10" pin="340,70" width="10" x="85" y="55"/>
+      <circ-port height="10" pin="340,100" width="10" x="85" y="65"/>
+      <circ-port height="10" pin="340,130" width="10" x="85" y="75"/>
+      <circ-port height="10" pin="340,160" width="10" x="85" y="85"/>
+      <circ-port height="10" pin="340,190" width="10" x="85" y="95"/>
+      <circ-port height="8" pin="170,80" width="8" x="66" y="46"/>
+      <circ-port height="8" pin="170,50" width="8" x="46" y="66"/>
+      <circ-port height="10" pin="180,200" width="10" x="45" y="85"/>
+      <circ-anchor facing="east" height="6" width="6" x="87" y="57"/>
+    </appear>
+    <comp lib="0" loc="(170,50)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="rx"/>
+    </comp>
+    <comp lib="0" loc="(340,70)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="o.cmd_ready"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(340,100)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="o.cmd_op"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(340,160)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(340,190)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(180,200)" name="Constant">
+      <a name="facing" val="west"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(340,100)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(180,200)" name="Pin">
+      <a name="output" val="true"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="cts"/>
+    </comp>
+    <comp lib="0" loc="(340,70)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(340,130)" name="Constant">
+      <a name="width" val="8"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(340,190)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="o.cmd_arg_2"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(340,130)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="o.cmd_arg_0"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(170,80)" name="Pin">
+      <a name="tristate" val="false"/>
+      <a name="label" val="processing"/>
+    </comp>
+    <comp lib="0" loc="(340,160)" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+      <a name="width" val="8"/>
+      <a name="tristate" val="false"/>
+      <a name="label" val="o.cmd_arg_1"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+  </circuit>
+</project>

@@ -1,6 +1,6 @@
-from nmigen import *
-from nmigen.sim import *
-from nmigen.build import Resource, Subsignal, Pins
+from amaranth import *
+from amaranth.sim import *
+from amaranth.build import Resource, Subsignal, Pins
 
 class XDomainLatch(Elaboratable):
 	def __init__(self):
@@ -41,7 +41,7 @@ class SPIReceiver(Elaboratable):
 		m = Module()
 
 		if not platform:
-			# BUG: workaround for nmigen not including input signals in VCD traces
+			# BUG: workaround for amaranth not including input signals in VCD traces
 			mosi = Signal(name='i_mosi')
 			sclk = Signal(name='i_sclk')
 			ssel = Signal(name='i_ssel')

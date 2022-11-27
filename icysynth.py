@@ -1,10 +1,10 @@
 from argparse import ArgumentParser
 
-from nmigen import *
-from nmigen.build import Platform, Resource, Subsignal, Pins
-from nmigen.back import verilog
-from nmigen.sim import *
-from nmigen.hdl.rec import *
+from amaranth import *
+from amaranth.build import Platform, Resource, Subsignal, Pins
+from amaranth.back import verilog
+from amaranth.sim import *
+from amaranth.hdl.rec import *
 
 from cmd import *
 from constants import *
@@ -115,7 +115,7 @@ class IcySynth(Elaboratable):
 # --------------------------------------------------------------------------------------------------
 
 def generate(top, *, do_program):
-	from nmigen_boards.icestick import ICEStickPlatform
+	from amaranth_boards.icestick import ICEStickPlatform
 
 	platform = ICEStickPlatform()
 

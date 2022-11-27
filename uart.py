@@ -1,8 +1,8 @@
-#!/usr/bin/env nmigen
+#!/usr/bin/env amaranth
 
-# Taken from kbob/nmigen-examples
+# Taken from kbob/amaranth-examples
 
-from nmigen import *
+from amaranth import *
 
 class UART(Elaboratable):
 

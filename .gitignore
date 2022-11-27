@@ -6,3 +6,4 @@ __pycache__/
 __MACOSX__
 *.sublime-project
 *.sublime-workspace
+venv/

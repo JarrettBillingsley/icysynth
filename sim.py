@@ -1,6 +1,6 @@
-from nmigen import *
-from nmigen.build import Platform
-from nmigen.back.pysim import *
+from amaranth import *
+from amaranth.build import Platform
+from amaranth.back.pysim import *
 
 from constants import *
 
@@ -93,7 +93,7 @@ def simulate(top, synth):
 		yield
 	sim.add_sync_process(shim)
 
-	# BUG: nmigen currently ignores the 'traces' param on this function,
+	# BUG: amaranth currently ignores the 'traces' param on this function,
 	# so the resulting gtkw isn't very useful.
 	with sim.write_vcd("out.vcd"):
 		sim.run_until(CLK_PERIOD * SIM_CLOCKS, run_passive = True)

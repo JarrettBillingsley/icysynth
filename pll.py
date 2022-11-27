@@ -1,15 +1,15 @@
-#!/usr/bin/env nmigen
+#!/usr/bin/env amaranth
 
-# Taken from kbob/nmigen-examples, with two small changes:
+# Taken from kbob/amaranth-examples, with two small changes:
 # SB_PLL40_PAD => SB_PLL40_CORE
 # i_PACKAGEPIN => i_REFERENCECLK
 
 from collections import namedtuple
 import warnings
 
-from nmigen import *
-from nmigen.lib.cdc import ResetSynchronizer
-from nmigen.cli import main
+from amaranth import *
+from amaranth.lib.cdc import ResetSynchronizer
+from amaranth.cli import main
 
 
 class PLL(Elaboratable):
@@ -21,7 +21,7 @@ class PLL(Elaboratable):
     mode.
 
     The reference clock is directly connected to a package pin. To
-    allocate that pin, request the pin with dir='-'; otherwise nMigen
+    allocate that pin, request the pin with dir='-'; otherwise amaranth
     inserts an SB_IO on the pin.  E.g.,
 
         clk_pin = platform.request('clk12', dir='-')

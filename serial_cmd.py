@@ -1,5 +1,5 @@
-from nmigen import *
-from nmigen.build import Platform
+from amaranth import *
+from amaranth.build import Platform
 
 from uart import *
 from signals import *
@@ -8,7 +8,7 @@ from signals import *
 # Serial UART Command interface
 # --------------------------------------------------------------------------------------------------
 
-# much of this code taken from nmigen-examples/receive-uart.py
+# much of this code taken from amaranth-examples/receive-uart.py
 
 class UartCmd(Elaboratable):
 	def __init__(self, baudrate, clk_freq):

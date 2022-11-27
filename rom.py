@@ -1,5 +1,5 @@
-from nmigen import *
-from nmigen.build import Platform
+from amaranth import *
+from amaranth.build import Platform
 
 # --------------------------------------------------------------------------------------------------
 # Volume Table ROM
